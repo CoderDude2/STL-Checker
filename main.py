@@ -1,7 +1,7 @@
 import stl
 
 def main() -> None:
-    raise NotImplementedError
+    print(stl.open_stl_file("test.stl")["facet-count"])
 
 if __name__ == "__main__":
     main()
