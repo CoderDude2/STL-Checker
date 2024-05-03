@@ -4,11 +4,6 @@ import numpy as np
 from dataclasses import dataclass
 import io
 
-class Vector3:
-    def __init__(self, x:float = None, y:float = None, z:float = None) -> None:
-        self.x = x if x is not None else 0
-        self.y = y if y is not None else 0
-        self.z = z if z is not None else 0
 
 @dataclass
 class Facet:
@@ -17,24 +12,38 @@ class Facet:
     v2:np.array
     v3:np.array
 
-def dot(v1:Vector3, v2:Vector3) -> float:
-    return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z)
+@dataclass
+class STLObject:
+    header:bytes
+    facet_count:int
+    facets:list[Facet]
 
-def magnitude(v:Vector3) -> float:
-    try:
-        return math.sqrt(dot(v,v))
-    except ZeroDivisionError:
-        return 0
+    def in_circle_10pi(self) -> bool:
+        for facet in self.facets:
+            p1 = np.array([facet.v1[0], facet.v1[1]])
+            p2 = np.array([facet.v2[0], facet.v2[1]])
+            p3 = np.array([facet.v3[0], facet.v3[1]])
+            if(distance_from_origin(p1) >= 5):
+                return False
+            if(distance_from_origin(p2) >= 5):
+                return False
+            if(distance_from_origin(p3) >= 5):
+                return False
+        return True
+    
+    def in_circle_14pi(self) -> bool:
+        for facet in self.facets:
+            p1 = np.array([facet.v1[0], facet.v1[1]])
+            p2 = np.array([facet.v2[0], facet.v2[1]])
+            p3 = np.array([facet.v3[0], facet.v3[1]])
+            if(distance_from_origin(p1) >= 7):
+                return False
+            if(distance_from_origin(p2) >= 7):
+                return False
+            if(distance_from_origin(p3) >= 7):
+                return False
+        return True
 
-def normalize(v:Vector3) -> Vector3:
-    new_vec = Vector3()
-    vector_magnitude = magnitude(v)
-    if(vector_magnitude > 0):
-        inverse_length = 1 / vector_magnitude
-        new_vec.x =  v.x * inverse_length
-        new_vec.y = v.y * inverse_length
-        new_vec.z = v.z * inverse_length
-    return new_vec
 
 def read_facet(file_stream:io.BufferedReader) -> Facet:
     normal_bytes = file_stream.read(12)
@@ -68,17 +77,16 @@ def read_facet(file_stream:io.BufferedReader) -> Facet:
 
     return f
 
-def open_stl_file(file_path:str) -> dict:
+def distance_from_origin(point:np.array) -> float:
+    return np.sqrt(point[0]**2 + point[1]**2)
+
+def open_stl_file(file_path:str) -> STLObject:
     stl_file = open(file_path, 'rb')
     header = stl_file.read(80)
     facet_count = int.from_bytes(stl_file.read(4), "little")
 
     facets = [read_facet(stl_file) for i in range(0, facet_count)]
     
-    stl = {
-        "header":header,
-        "facet-count":facet_count,
-        "facets":facets
-    }
+    stl = STLObject(header=header, facet_count=facet_count, facets=facets)
 
     return stl
