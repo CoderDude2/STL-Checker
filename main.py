@@ -26,6 +26,8 @@ def main() -> None:
         x.append(facet.v2[0])
         y.append(facet.v2[1])
         z.append(facet.v2[2])
+    
+    print(max(z) - min(z))
 
     # for i in zip(x,y):
     #     distance = stl.distance_from_origin(np.array(i))
@@ -51,12 +53,17 @@ def main() -> None:
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
+
     theta = np.linspace(0, 2*np.pi, 360)
-    y1 = 2*np.cos(theta)
-    z1 = 2*np.sin(theta)
+    y1 = 5*np.cos(theta)
+    z1 = 5*np.sin(theta)
+
+    y2 = 7*np.cos(theta)
+    z2 = 7*np.sin(theta)
 
 
     ax.plot(y1,z1)
+    ax.plot(y2, z2)
     ax.plot(x,y,z, 'o')
 
     plt.show()
