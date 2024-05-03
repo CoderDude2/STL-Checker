@@ -4,7 +4,6 @@ import numpy as np
 from dataclasses import dataclass
 import io
 
-
 @dataclass
 class Facet:
     normal:np.array
@@ -43,7 +42,26 @@ class STLObject:
             if(distance_from_origin(p3) >= 7):
                 return False
         return True
+    
+    def length(self) -> float:
+        min_z:float = 0
+        max_z:float = 0
 
+        for facet in self.facets:
+            z1 = facet.v1[2]
+            z2 = facet.v2[2]
+            z3 = facet.v3[2]
+
+            max_z = z1 if z1 > max_z else max_z
+            max_z = z2 if z2 > max_z else max_z
+            max_z = z3 if z3 > max_z else max_z
+
+            min_z = z1 if z1 < min_z else min_z
+            min_z = z2 if z2 < min_z else min_z
+            min_z = z3 if z3 < min_z else min_z
+
+        
+        return max_z - min_z
 
 def read_facet(file_stream:io.BufferedReader) -> Facet:
     normal_bytes = file_stream.read(12)
@@ -86,7 +104,6 @@ def open_stl_file(file_path:str) -> STLObject:
     facet_count = int.from_bytes(stl_file.read(4), "little")
 
     facets = [read_facet(stl_file) for i in range(0, facet_count)]
-    
     stl = STLObject(header=header, facet_count=facet_count, facets=facets)
 
     return stl
