@@ -48,5 +48,3 @@ def get_cases(folder_path:str) -> list[Case]:
             c:Case = Case(stl_file, file_name.group("PDO"), file_name.group("connection_type"), circle, case_type, max_length)
             cases.append(c)
     return cases
-        
-            
