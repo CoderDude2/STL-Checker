@@ -44,23 +44,22 @@ class STLObject:
         return True
     
     def length(self) -> float:
-        min_z:float = 0
-        max_z:float = 0
+        min_z:float = self.facets[0].v1[2]
+        max_z:float = self.facets[0].v1[2]
 
         for facet in self.facets:
+            # print(facet.v1)
             z1 = facet.v1[2]
             z2 = facet.v2[2]
             z3 = facet.v3[2]
 
             max_z = z1 if z1 > max_z else max_z
-            max_z = z2 if z2 > max_z else max_z
+            max_z = z2 if z3 > max_z else max_z
             max_z = z3 if z3 > max_z else max_z
 
             min_z = z1 if z1 < min_z else min_z
-            min_z = z2 if z2 < min_z else min_z
+            min_z = z2 if z3 < min_z else min_z
             min_z = z3 if z3 < min_z else min_z
-
-        
         return max_z - min_z
 
 def read_facet(file_stream:io.BufferedReader) -> Facet:
