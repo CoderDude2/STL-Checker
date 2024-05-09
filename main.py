@@ -7,7 +7,7 @@ import case
 import stl
 
 def main() -> None:
-    cases:list[case.Case] = case.get_cases("stls")
+    cases:list[case.Case] = case.get_cases("stl")
     for c in cases:
         # if(c.stl.length() > c.max_length):
         #     print(f"{c} length exceeds max length of {c.max_length}\nActual Length: {c.stl.length()}")
@@ -15,14 +15,13 @@ def main() -> None:
             print(c, "Exceeds 10pi!")
         if(not c.stl.in_circle_14pi() and c.circle == "14pi"):
             print(c, "Exceeds 14pi!")
-        
         print(c, c.stl.length(), c.max_length)
         print()
 
 def graph(stl_file:stl.STLObject) -> None:
-    x=[]
-    y=[]
-    z=[]
+    x:list[float] = []
+    y:list[float] = []
+    z:list[float] = []
 
     for facet in stl_file.facets:
         x.append(facet.v1[0])
@@ -37,8 +36,8 @@ def graph(stl_file:stl.STLObject) -> None:
         y.append(facet.v3[1])
         z.append(facet.v3[2])
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    fig:plt.Figure = plt.figure()
+    ax:plt.Axes = fig.add_subplot(111, projection='3d')
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
