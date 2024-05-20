@@ -7,7 +7,8 @@ import case
 import stl
 
 def main() -> None:
-    cases:list[case.Case] = case.get_cases("stl")
+    cases:list[case.Case] = case.get_cases("stls")
+    print(cases[0].stl.facets[0])
     for c in cases:
         # if(c.stl.length() > c.max_length):
         #     print(f"{c} length exceeds max length of {c.max_length}\nActual Length: {c.stl.length()}")
