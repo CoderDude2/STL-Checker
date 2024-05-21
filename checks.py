@@ -22,20 +22,45 @@ def intersect_triangle(ray_origin:npt.ArrayLike,
     v0v1:npt.ArrayLike = v1 - v0
     v0v2:npt.ArrayLike = v2 - v0
     # Normal of the triangle
-    N = np.cross(v0v1, v0v2)
+    N:npt.ArrayLike = np.cross(v0v1, v0v2)
     print(N)
 
-intersect_triangle(
-    ray_origin=np.array([1,0.5,0.5]),
-    ray_direction=np.array([-1,0.5,0.5]),
+    # Calculate D, the distance from the origin to the plane
+    D = -(np.dot(N, v0))
+
+    if(np.dot(N, ray_direction) < 1e-6):
+        return False
+
+    # Calculate t, scalar value representing the distance from the ray origin to the hit point
+    t = -(np.dot(N, ray_origin) + D) / np.dot(N, ray_direction)
+    if(t < 0):
+        return False
+
+    # Calculate the hit postion
+    p_hit:npt.ArrayLike = ray_origin + t * ray_direction
+
+    edge0:npt.ArrayLike = v1 - v0
+    c:npt.ArrayLike = np.cross(edge0, p_hit - v0)
+    if(np.dot(N, c)  < 0):
+        return False
+    
+    edge1:npt.ArrayLike = v2 - v1
+    c:npt.ArrayLike = np.cross(edge1, p_hit - v1)
+    if(np.dot(N, c)  < 0):
+        return False
+    
+
+    edge2:npt.ArrayLike = v0 - v2
+    c:npt.ArrayLike = np.cross(edge2, p_hit - v2)
+    if(np.dot(N, c)  < 0):
+        return False
+    
+    return True
+
+i = intersect_triangle(
+    ray_origin=np.array([1,1,0.5]),
+    ray_direction=np.array([-1,0,0]),
     v0=np.array([0,0,0]),
     v1=np.array([0,0.5,1]),
     v2=np.array([0,1,0])
 )
-
-# print(intersect_plane(
-#     plane_normal=np.array([0,0,1]),
-#     plane_point=np.array([0,0,0]),
-#     ray_origin=np.array([1,1,-2]),
-#     ray_direction=np.array([0,0,1]),
-# ))
