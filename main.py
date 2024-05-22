@@ -55,8 +55,11 @@ def graph(stl_file:stl.STLObject) -> None:
     ax.plot(y2,z2)
     ax.plot(x,y,z,'o')
 
+    ax.plot(0,0,0,'o')
+
     plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    graph(stl.open_stl_file("stls/PDO-PL-0377326__(OTM-CS-TA14,7326).stl"))
+    # main()

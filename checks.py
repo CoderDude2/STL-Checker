@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.typing as npt
+import stl
 
 def normalize(vector:npt.ArrayLike) -> npt.ArrayLike:
     return vector / np.sqrt(np.dot(vector, vector))
@@ -22,7 +23,7 @@ def intersect_triangle(ray_origin:npt.ArrayLike,
     v0v1:npt.ArrayLike = v1 - v0
     v0v2:npt.ArrayLike = v2 - v0
     # Normal of the triangle
-    N:npt.ArrayLike = np.cross(v0v1, v0v2)
+    N:npt.ArrayLike = normalize(np.cross(v0v1, v0v2))
     print(N)
 
     # Calculate D, the distance from the origin to the plane
@@ -57,10 +58,22 @@ def intersect_triangle(ray_origin:npt.ArrayLike,
     
     return True
 
-i = intersect_triangle(
-    ray_origin=np.array([1,1,0.5]),
-    ray_direction=np.array([-1,0,0]),
-    v0=np.array([0,0,0]),
-    v1=np.array([0,0.5,1]),
-    v2=np.array([0,1,0])
-)
+
+def is_centered(stl_object:stl.STLObject):
+    for facet in stl_object.facets:
+        x_ray_origin = np.array([20,0,0])
+        x_ray_direction = x_ray_origin - np.array([0,0,0])
+
+        intersect_triangle(
+            x_ray_origin,
+            x_ray_direction,
+            facet.v1,
+            facet.v2,
+            facet.v3
+        )
+
+
+        print(facet.normal)
+        print()
+
+is_centered(stl.open_stl_file("stls/PDO-PL-0377326__(OTM-CS-TA14,7326).stl"))
