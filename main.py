@@ -1,28 +1,49 @@
-import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 import case
 import stl
 import checks
-import time
+
+import os
+import shutil
+
+files_path:str = r"C:\Users\TruUser\Desktop\checker\files"
+not_centered_path:str = r"C:\Users\TruUser\Desktop\checker\output\not_centered"
+over_10_pi_path:str = r"C:\Users\TruUser\Desktop\checker\output\over_10_pi"
+over_14_pi_path:str = r"C:\Users\TruUser\Desktop\checker\output\over_14_pi"
+passed_path:str = r"C:\Users\TruUser\Desktop\checker\output\passed"
+exceeds_max_length_path:str = r"C:\Users\TruUser\Desktop\checker\output\exceeds_max_length"
 
 def main() -> None:
-    cases:list[case.Case] = case.get_cases("stls")
+    cases:list[case.Case] = case.get_cases(files_path)
     for c in cases:
-        if(not c.stl.in_circle_10pi() and c.circle == "10pi"):
-            print(c, "Exceeds 10pi!")
-        if(not c.stl.in_circle_14pi() and c.circle == "14pi"):
-            print(c, "Exceeds 14pi!")
-        print(c, c.stl.length(), c.max_length)
-
-        start = time.perf_counter()
-        print("Centered:", checks.is_centered(c.stl))
-        end = time.perf_counter()
-        print(round(end - start, 5), "Seconds")
-        print()
+        if(not checks.is_centered(c.stl)):
+           shutil.move(
+                os.path.join(files_path, c.name),
+                os.path.join(not_centered_path, c.name)
+                ) 
+        elif(not c.stl.in_circle_10pi() and c.circle == "10pi"):
+            shutil.move(
+                os.path.join(files_path, c.name),
+                os.path.join(over_10_pi_path, c.name)
+                )
+        elif(not c.stl.in_circle_14pi() and c.circle == "14pi"):
+            shutil.move(
+                os.path.join(files_path, c.name),
+                os.path.join(over_14_pi_path, c.name)
+            )
+        elif(c.stl.length() > c.max_length):
+            shutil.move(
+                os.path.join(files_path, c.name),
+                os.path.join(exceeds_max_length_path, c.name)
+            )
+        else:
+            shutil.move(
+                os.path.join(files_path, c.name),
+                os.path.join(passed_path, c.name)
+            )
 
 def graph(stl_file:stl.STLObject) -> None:
     x:list[float] = []
@@ -64,7 +85,5 @@ def graph(stl_file:stl.STLObject) -> None:
 
     plt.show()
 
-
 if __name__ == "__main__":
-    graph(stl.open_stl_file("stls/PDO-PL-0251664__(MRD-CS-TA10,1664).stl"))
     main()

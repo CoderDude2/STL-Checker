@@ -7,15 +7,16 @@ import stl
 import time
 
 def normalize(vector:npt.ArrayLike) -> npt.ArrayLike:
-    return vector / np.sqrt(np.dot(vector, vector))
-
+    if(np.dot(vector, vector) > 0):
+        return vector / np.sqrt(np.dot(vector, vector))
+    return vector
 
 def intersect_plane(plane_point:npt.ArrayLike, 
                     plane_normal:npt.ArrayLike, 
                     ray_origin:npt.ArrayLike, 
                     ray_direction:npt.ArrayLike) -> bool:
     if(ray_direction.dot(plane_normal) > 1e-6):
-        t = np.round(((plane_point - ray_origin).dot(plane_normal)) / (ray_direction.dot(plane_normal)), 4)
+        t:float = np.round(((plane_point - ray_origin).dot(plane_normal)) / (ray_direction.dot(plane_normal)), 4)
         return t >= 0
     return False
 
@@ -28,16 +29,15 @@ def intersect_triangle(ray_origin:npt.ArrayLike,
     v0v2:npt.ArrayLike = v2 - v0
     # Normal of the triangle
     N:npt.ArrayLike = normalize(np.cross(v0v1, v0v2))
-    # print(N)
 
     # Calculate D, the distance from the origin to the plane
-    D = -(np.dot(N, v0))
+    D:float = -(np.dot(N, v0))
 
     if(np.dot(N, ray_direction) < 1e-6):
         return False
 
     # Calculate t, scalar value representing the distance from the ray origin to the hit point
-    t = -(np.dot(N, ray_origin) + D) / np.dot(N, ray_direction)
+    t:float = -(np.dot(N, ray_origin) + D) / np.dot(N, ray_direction)
     # if(t > 0):
     #     return False
 
@@ -62,20 +62,19 @@ def intersect_triangle(ray_origin:npt.ArrayLike,
     
     return True
 
-
 def is_centered(stl_object:stl.STLObject) -> bool:
-    x_ray_origin = np.array([20,0,0])
-    x_ray_direction = normalize(x_ray_origin - np.array([0,0,0]))
+    x_ray_origin:npt.ArrayLike = np.array([20,0,2])
+    x_ray_direction:npt.ArrayLike = normalize(x_ray_origin - np.array([0,0,0]))
 
-    y_ray_origin = np.array([0,20,0])
-    y_ray_direction = normalize(y_ray_origin - np.array([0,0,0]))
+    y_ray_origin:npt.ArrayLike = np.array([0,20,2])
+    y_ray_direction:npt.ArrayLike = normalize(y_ray_origin - np.array([0,0,0]))
 
-    z_ray_origin = np.array([0,0,20])
-    z_ray_direction = normalize(z_ray_origin - np.array([0,0,0]))
+    z_ray_origin:npt.ArrayLike = np.array([0,0,20])
+    z_ray_direction:npt.ArrayLike = normalize(z_ray_origin - np.array([0,0,0]))
 
-    x_intersection = False
-    y_intersection = False
-    z_intersection = False
+    x_intersection:bool = False
+    y_intersection:bool = False
+    z_intersection:bool = False
 
     for facet in stl_object.facets:
         x_intersection = intersect_triangle(x_ray_origin, x_ray_direction, facet.v1, facet.v2, facet.v3) if x_intersection == False else x_intersection
@@ -87,15 +86,15 @@ def is_centered(stl_object:stl.STLObject) -> bool:
     
     return False
 
-def is_centered_visualized(stl_object:stl.STLObject):
-    x_ray_origin = np.array([20,0,0])
-    x_ray_direction = normalize(x_ray_origin - np.array([0,0,0]))
+def is_centered_visualized(stl_object:stl.STLObject) -> None:
+    x_ray_origin:npt.ArrayLike = np.array([20,0,2])
+    x_ray_direction:npt.ArrayLike = normalize(x_ray_origin - np.array([0,0,0]))
 
-    y_ray_origin = np.array([0,20,0])
-    y_ray_direction = normalize(y_ray_origin - np.array([0,0,0]))
+    y_ray_origin:npt.ArrayLike = np.array([0,20,2])
+    y_ray_direction:npt.ArrayLike = normalize(y_ray_origin - np.array([0,0,0]))
 
-    z_ray_origin = np.array([0,0,20])
-    z_ray_direction = normalize(z_ray_origin - np.array([0,0,0]))
+    z_ray_origin:npt.ArrayLike = np.array([0,0,20])
+    z_ray_direction:npt.ArrayLike = normalize(z_ray_origin - np.array([0,0,0]))
 
     fig:plt.Figure = plt.figure()
     ax:plt.Axes = fig.add_subplot(111, projection='3d')
@@ -104,21 +103,21 @@ def is_centered_visualized(stl_object:stl.STLObject):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
-    x = []
-    y = []
-    z = []
+    x:list[float] = []
+    y:list[float] = []
+    z:list[float] = []
 
-    int_x_0 = []
-    int_y_0 = []
-    int_z_0 = []
+    int_x_0:list[float] = []
+    int_y_0:list[float] = []
+    int_z_0:list[float] = []
 
-    int_x_1 = []
-    int_y_1 = []
-    int_z_1 = []
+    int_x_1:list[float] = []
+    int_y_1:list[float] = []
+    int_z_1:list[float] = []
 
-    int_x_2 = []
-    int_y_2 = []
-    int_z_2 = []
+    int_x_2:list[float] = []
+    int_y_2:list[float] = []
+    int_z_2:list[float] = []
 
     ax.plot(0,0,0,'o', color="green")
     for facet in stl_object.facets:
@@ -175,7 +174,4 @@ def is_centered_visualized(stl_object:stl.STLObject):
     ax.plot(int_x_0, int_y_0, int_z_0, 'o', color="red")
     ax.plot(int_x_1, int_y_1, int_z_1, 'o', color="green")
     ax.plot(int_x_2, int_y_2, int_z_2, 'o', color="blue")
-    ax.plot(x_ray_direction[0], x_ray_direction[1], x_ray_direction[2], 'o',color="orange")
     plt.show()
-
-is_centered_visualized(stl.open_stl_file("stls/PDO-PL-0251664__(MRD-CS-TA10,1664).stl"))

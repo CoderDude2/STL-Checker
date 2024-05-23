@@ -5,10 +5,11 @@ import re
 import stl
 
 case_regex:re.Pattern = re.compile(r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection_type>[A-Za-z0-9;\-]+),(?P<id>\d+)\)\[?(?P<angle>[A-Za-z0-9\.\-#= ]+)?\]?(?P<file_type>\.\w+)")
-fourteen_millimeter = ["NDG-CS", "NDC-CS", "MCN-CS", "MCS-CS", "MCW-CS", "SXR-CS", "SXW-CS", "MRD-CS"]
+fourteen_millimeter:list[str] = ["NDG-CS", "NDC-CS", "MCN-CS", "MCS-CS", "MCW-CS", "SXR-CS", "SXW-CS", "MRD-CS"]
 
 @dataclass
 class Case:
+    name:str
     stl:stl.STLObject
     pdo:str
     connection:str
@@ -25,6 +26,7 @@ def get_cases(folder_path:str) -> list[Case]:
         for file in os.listdir(folder_path):
             file_name = case_regex.match(file)
             if(file_name):
+                name:str=file_name.group(0)
                 stl_file:stl.STLObject = stl.open_stl_file(os.path.join(folder_path, file_name.group(0)))
                 circle:str = ""
                 case_type:str = ""
@@ -46,6 +48,6 @@ def get_cases(folder_path:str) -> list[Case]:
                 else:
                     case_type = "DS"
 
-                c:Case = Case(stl_file, file_name.group("PDO"), file_name.group("connection_type"), circle, case_type, max_length)
+                c:Case = Case(name, stl_file, file_name.group("PDO"), file_name.group("connection_type"), circle, case_type, max_length)
                 cases.append(c)
     return cases
