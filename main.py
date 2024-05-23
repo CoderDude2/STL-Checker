@@ -1,22 +1,27 @@
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 import case
 import stl
+import checks
+import time
 
 def main() -> None:
     cases:list[case.Case] = case.get_cases("stls")
-    print(cases[0].stl.facets[0])
     for c in cases:
-        # if(c.stl.length() > c.max_length):
-        #     print(f"{c} length exceeds max length of {c.max_length}\nActual Length: {c.stl.length()}")
         if(not c.stl.in_circle_10pi() and c.circle == "10pi"):
             print(c, "Exceeds 10pi!")
         if(not c.stl.in_circle_14pi() and c.circle == "14pi"):
             print(c, "Exceeds 14pi!")
         print(c, c.stl.length(), c.max_length)
+
+        start = time.perf_counter()
+        print("Centered:", checks.is_centered(c.stl))
+        end = time.perf_counter()
+        print(round(end - start, 5), "Seconds")
         print()
 
 def graph(stl_file:stl.STLObject) -> None:
@@ -53,7 +58,7 @@ def graph(stl_file:stl.STLObject) -> None:
 
     ax.plot(y1,z1)
     ax.plot(y2,z2)
-    ax.plot(x,y,z,'o')
+    ax.plot(x,y,z, 'o')
 
     ax.plot(0,0,0,'o')
 
@@ -61,5 +66,5 @@ def graph(stl_file:stl.STLObject) -> None:
 
 
 if __name__ == "__main__":
-    graph(stl.open_stl_file("stls/PDO-PL-0377326__(OTM-CS-TA14,7326).stl"))
-    # main()
+    graph(stl.open_stl_file("stls/PDO-PL-0251664__(MRD-CS-TA10,1664).stl"))
+    main()
