@@ -10,7 +10,7 @@ import os
 import shutil
 
 files_path:str = r"C:\Users\TruUser\Desktop\checker\files"
-not_centered_path:str = r"C:\Users\TruUser\Desktop\checker\output\not_centered"
+uncentered_path:str = r"C:\Users\TruUser\Desktop\checker\output\uncentered"
 over_10_pi_path:str = r"C:\Users\TruUser\Desktop\checker\output\over_10_pi"
 over_14_pi_path:str = r"C:\Users\TruUser\Desktop\checker\output\over_14_pi"
 passed_path:str = r"C:\Users\TruUser\Desktop\checker\output\passed"
@@ -22,7 +22,7 @@ def main() -> None:
         if(not checks.is_centered(c.stl)):
            shutil.move(
                 os.path.join(files_path, c.name),
-                os.path.join(not_centered_path, c.name)
+                os.path.join(uncentered_path, c.name)
                 ) 
         elif(not c.stl.in_circle_10pi() and c.circle == "10pi"):
             shutil.move(
