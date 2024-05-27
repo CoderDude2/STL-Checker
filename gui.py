@@ -9,9 +9,8 @@ from pathlib import Path
 import case
 import checks
 
-ROOT_DIR = Path(__file__).resolve().parent
 
-file_processing_lock:threading.Lock = threading.Lock()
+ROOT_DIR = Path(__file__).resolve().parent
 
 OUTPUT_FOLDER_PATH:str = os.path.join(ROOT_DIR, "output")
 FILES_PATH:str = os.path.join(ROOT_DIR, "files")
@@ -41,6 +40,8 @@ if(not os.path.exists(EXCEEDS_MAX_LENGTH_PATH)):
 
 if(not os.path.exists(PASSED_PATH)):
     os.mkdir(PASSED_PATH)
+
+file_processing_lock:threading.Lock = threading.Lock()
 
 class Checker(threading.Thread):
     def __init__(self, counter_callback:callable=None) -> None:
@@ -126,6 +127,7 @@ class App:
         self.exceeds_max_length_text:tk.StringVar = tk.StringVar(value="Exceeds Max Length: 0")
         self.passed_text:tk.StringVar = tk.StringVar(value="Passed: 0")
 
+        self.add_files_btn:tk.Button = tk.Button(text="Add Files", command=self.open_files_folder)
         self.process_files_btn:tk.Button = tk.Button(text="Process Files", command=self.c.start_processing)
         self.open_output_btn:tk.Button = tk.Button(text="Open Output Folder", width=20, command=self.open_output_folder)
 
@@ -142,6 +144,7 @@ class App:
         self.exceeds_max_length_lbl.pack(anchor="w")
         self.passed_lbl.pack(anchor="w")
 
+        self.add_files_btn.pack(fill="x")
         self.process_files_btn.pack(fill="x")
         self.label_frame.pack(fill="x", pady=20)
         self.open_output_btn.pack(fill="x")
@@ -156,8 +159,18 @@ class App:
         self.exceeds_max_length_text.set(f"Exceeds Max Length: {exceeds_length_count}")
         self.passed_text.set(f"Passed: {passed_count}")
 
+    def open_files_folder(self) -> None:
+        if(os.name == "nt"):
+            os.system(f'start {FILES_PATH}')
+        else:
+            os.system(f'open {FILES_PATH}')
+
     def open_output_folder(self) -> None:
-        os.system(f'open {OUTPUT_FOLDER_PATH}')
+        if(os.name == "nt"):
+            os.system(f'start {OUTPUT_FOLDER_PATH}')
+        else:
+            os.system(f'open {OUTPUT_FOLDER_PATH}')
+        
 
     def run(self) -> None:
         self.master.mainloop()

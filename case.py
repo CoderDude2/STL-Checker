@@ -6,6 +6,7 @@ import re
 
 import stl
 
+
 case_regex:re.Pattern = re.compile(r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection_type>[A-Za-z0-9;\-]+),(?P<id>\d+)\)\[?(?P<angle>[A-Za-z0-9\.\-#= ]+)?\]?(?P<file_type>\.\w+)")
 fourteen_millimeter:list[str] = ["NDG-CS", "NDC-CS", "MCN-CS", "MCS-CS", "MCW-CS", "SXR-CS", "SXW-CS", "MRD-CS"]
 

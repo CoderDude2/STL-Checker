@@ -6,6 +6,7 @@ import numpy.typing as npt
 
 import stl
 
+
 def normalize(vector:npt.ArrayLike) -> npt.ArrayLike:
     if(np.dot(vector, vector) > 0):
         return vector / np.sqrt(np.dot(vector, vector))
