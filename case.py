@@ -1,3 +1,5 @@
+# Author: Isaac J. Boots
+
 from dataclasses import dataclass
 import os
 import re
@@ -32,9 +34,9 @@ def get_cases(folder_path:str) -> list[Case]:
                 case_type:str = ""
                 max_length:float = 14.2 if any([i in file_name.group("connection_type") for i in fourteen_millimeter]) else 17.2
 
-                if("TA14" in file_name.group("connection_type")):
+                if("TA14" in file_name.group("connection_type") or "TC14" in file_name.group("connection_type")):
                     circle = "14pi"
-                elif("TA10" in file_name.group("connection_type")):
+                elif("TA10" in file_name.group("connection_type") or "TC10" in file_name.group("connection_type")):
                     circle = "10pi"
                 else:
                     circle = "14pi"

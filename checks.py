@@ -1,24 +1,15 @@
-import matplotlib.pyplot as plt
+# Author: Isaac J. Boots
 
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
-import stl
 
-import time
+import stl
 
 def normalize(vector:npt.ArrayLike) -> npt.ArrayLike:
     if(np.dot(vector, vector) > 0):
         return vector / np.sqrt(np.dot(vector, vector))
     return vector
-
-def intersect_plane(plane_point:npt.ArrayLike, 
-                    plane_normal:npt.ArrayLike, 
-                    ray_origin:npt.ArrayLike, 
-                    ray_direction:npt.ArrayLike) -> bool:
-    if(ray_direction.dot(plane_normal) > 1e-6):
-        t:float = np.round(((plane_point - ray_origin).dot(plane_normal)) / (ray_direction.dot(plane_normal)), 4)
-        return t >= 0
-    return False
 
 def intersect_triangle(ray_origin:npt.ArrayLike, 
                        ray_direction:npt.ArrayLike,
@@ -38,25 +29,24 @@ def intersect_triangle(ray_origin:npt.ArrayLike,
 
     # Calculate t, scalar value representing the distance from the ray origin to the hit point
     t:float = -(np.dot(N, ray_origin) + D) / np.dot(N, ray_direction)
-    # if(t > 0):
-    #     return False
 
     # Calculate the hit postion
     p_hit:npt.ArrayLike = ray_origin + t * ray_direction
 
+    # Determine if the point is inside of the triangle
     edge0:npt.ArrayLike = v1 - v0
     c:npt.ArrayLike = np.cross(edge0, p_hit - v0)
     if(np.dot(N, c)  < 0):
         return False
     
     edge1:npt.ArrayLike = v2 - v1
-    c:npt.ArrayLike = np.cross(edge1, p_hit - v1)
+    c = np.cross(edge1, p_hit - v1)
     if(np.dot(N, c)  < 0):
         return False
     
 
     edge2:npt.ArrayLike = v0 - v2
-    c:npt.ArrayLike = np.cross(edge2, p_hit - v2)
+    c = np.cross(edge2, p_hit - v2)
     if(np.dot(N, c)  < 0):
         return False
     

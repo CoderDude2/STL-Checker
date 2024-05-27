@@ -1,9 +1,12 @@
-import math
+# Author: Isaac J. Boots
+
+import io
 import struct
+from dataclasses import dataclass
+
 import numpy as np
 import numpy.typing as npt
-from dataclasses import dataclass
-import io
+
 
 @dataclass
 class Facet:
@@ -20,9 +23,9 @@ class STLObject:
 
     def in_circle_10pi(self) -> bool:
         for facet in self.facets:
-            p1 = np.array([facet.v1[0], facet.v1[1]])
-            p2 = np.array([facet.v2[0], facet.v2[1]])
-            p3 = np.array([facet.v3[0], facet.v3[1]])
+            p1:npt.ArrayLike = np.array([facet.v1[0], facet.v1[1]])
+            p2:npt.ArrayLike = np.array([facet.v2[0], facet.v2[1]])
+            p3:npt.ArrayLike = np.array([facet.v3[0], facet.v3[1]])
             if(distance_from_origin(p1) >= 5):
                 return False
             if(distance_from_origin(p2) >= 5):
@@ -33,9 +36,9 @@ class STLObject:
     
     def in_circle_14pi(self) -> bool:
         for facet in self.facets:
-            p1 = np.array([facet.v1[0], facet.v1[1]])
-            p2 = np.array([facet.v2[0], facet.v2[1]])
-            p3 = np.array([facet.v3[0], facet.v3[1]])
+            p1:npt.ArrayLike = np.array([facet.v1[0], facet.v1[1]])
+            p2:npt.ArrayLike = np.array([facet.v2[0], facet.v2[1]])
+            p3:npt.ArrayLike = np.array([facet.v3[0], facet.v3[1]])
             if(distance_from_origin(p1) >= 7):
                 return False
             if(distance_from_origin(p2) >= 7):
@@ -49,10 +52,9 @@ class STLObject:
         max_z:float = self.facets[0].v1[2]
 
         for facet in self.facets:
-            # print(facet.v1)
-            z1 = facet.v1[2]
-            z2 = facet.v2[2]
-            z3 = facet.v3[2]
+            z1:float = facet.v1[2]
+            z2:float = facet.v2[2]
+            z3:float = facet.v3[2]
 
             max_z = z1 if z1 > max_z else max_z
             max_z = z2 if z3 > max_z else max_z
@@ -64,11 +66,11 @@ class STLObject:
         return max_z - min_z
 
 def read_facet(file_stream:io.BufferedReader) -> Facet:
-    normal_bytes = file_stream.read(12)
-    vertex1_bytes = file_stream.read(12)
-    vertex2_bytes = file_stream.read(12)
-    vertex3_bytes = file_stream.read(12)
-    attribute_bytes = file_stream.read(2)
+    normal_bytes:bytes = file_stream.read(12)
+    vertex1_bytes:bytes = file_stream.read(12)
+    vertex2_bytes:bytes = file_stream.read(12)
+    vertex3_bytes:bytes = file_stream.read(12)
+    attribute_bytes:bytes = file_stream.read(2)
 
     ni:float = struct.unpack('f', normal_bytes[0:4])[0]
     nj:float = struct.unpack('f', normal_bytes[4:8])[0]
