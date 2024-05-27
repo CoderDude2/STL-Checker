@@ -4,20 +4,43 @@ import os
 import shutil
 import threading
 import tkinter as tk
+from pathlib import Path
 
 import case
 import checks
 
+ROOT_DIR = Path(__file__).resolve().parent
 
 file_processing_lock:threading.Lock = threading.Lock()
 
-OUTPUT_FOLDER_PATH:str = r"/Users/isaacboots/Desktop/checker/output"
-FILES_PATH:str = r"/Users/isaacboots/Desktop/checker/files"
-UNCENTERED_PATH:str = r"/Users/isaacboots/Desktop/checker/output/uncentered"
-OVER_10_PI_PATH:str = r"/Users/isaacboots/Desktop/checker/output/over_10_pi"
-OVER_14_PI_PATH:str = r"/Users/isaacboots/Desktop/checker/output/over_14_pi"
-PASSED_PATH:str = r"/Users/isaacboots/Desktop/checker/output/passed"
-EXCEEDS_MAX_LENGTH_PATH:str = r"/Users/isaacboots/Desktop/checker/output/exceeds_max_length"
+OUTPUT_FOLDER_PATH:str = os.path.join(ROOT_DIR, "output")
+FILES_PATH:str = os.path.join(ROOT_DIR, "files")
+UNCENTERED_PATH:str = os.path.join(ROOT_DIR, "output/uncentered")
+OVER_10_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_10_pi")
+OVER_14_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_14_pi")
+EXCEEDS_MAX_LENGTH_PATH:str = os.path.join(ROOT_DIR, "output/exceeds_max_length")
+PASSED_PATH:str = os.path.join(ROOT_DIR, "output/passed")
+
+if(not os.path.exists(OUTPUT_FOLDER_PATH)):
+    os.mkdir(OUTPUT_FOLDER_PATH)
+
+if(not os.path.exists(FILES_PATH)):
+    os.mkdir(FILES_PATH)
+
+if(not os.path.exists(UNCENTERED_PATH)):
+    os.mkdir(UNCENTERED_PATH)
+
+if(not os.path.exists(OVER_10_PI_PATH)):
+    os.mkdir(OVER_10_PI_PATH)
+
+if(not os.path.exists(OVER_14_PI_PATH)):
+    os.mkdir(OVER_14_PI_PATH)
+
+if(not os.path.exists(EXCEEDS_MAX_LENGTH_PATH)):
+    os.mkdir(EXCEEDS_MAX_LENGTH_PATH)
+
+if(not os.path.exists(PASSED_PATH)):
+    os.mkdir(PASSED_PATH)
 
 class Checker(threading.Thread):
     def __init__(self, counter_callback:callable=None) -> None:
