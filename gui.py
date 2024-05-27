@@ -115,7 +115,7 @@ class App:
     def __init__(self) -> None:
         self.master:tk.Tk = tk.Tk()
         self.master.title("STL Checker")
-        self.master.geometry("250x200")
+        # self.master.geometry("250x200")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
         self.c:Checker = Checker(self.update_counter_request)
