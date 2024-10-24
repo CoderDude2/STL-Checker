@@ -5,6 +5,7 @@ import shutil
 import threading
 import tkinter as tk
 from pathlib import Path
+import time
 
 import case
 import checks
@@ -134,18 +135,38 @@ class App:
 
 
     def update_counters(self) -> None:
+        prev_uncentered_count = 0
+        prev_exceeds_10pi_count = 0
+        prev_exceeds_14pi_count = 0
+        prev_exceeds_length_count = 0
+        prev_passed_count = 0
+
         while True:
             uncentered_count = len([file for file in os.listdir(UNCENTERED_PATH) if ".stl" in file.lower()])
             exceeds_10pi_count = len([file for file in os.listdir(OVER_10_PI_PATH) if ".stl" in file.lower()])
             exceeds_14pi_count = len([file for file in os.listdir(OVER_14_PI_PATH) if ".stl" in file.lower()])
             exceeds_length_count = len([file for file in os.listdir(EXCEEDS_MAX_LENGTH_PATH) if ".stl" in file.lower()])
             passed_count = len([file for file in os.listdir(PASSED_PATH) if ".stl" in file.lower()])
+
+            if uncentered_count != prev_uncentered_count:
+                prev_uncentered_count = uncentered_count
+                self.uncentered_text.set(f"Uncentered: {uncentered_count}")
             
-            self.uncentered_text.set(f"Uncentered: {uncentered_count}")
-            self.exceeds_10_pi_text.set(f"Exceeds 10pi: {exceeds_10pi_count}")
-            self.exceeds_14_pi_text.set(f"Exceeds 14pi: {exceeds_14pi_count}")
-            self.exceeds_max_length_text.set(f"Exceeds Max Length: {exceeds_length_count}")
-            self.passed_text.set(f"Passed: {passed_count}")
+            if exceeds_10pi_count != prev_exceeds_10pi_count:
+                prev_exceeds_10pi_count = exceeds_10pi_count
+                self.exceeds_10_pi_text.set(f"Exceeds 10pi: {exceeds_10pi_count}")
+            
+            if exceeds_14pi_count != prev_exceeds_14pi_count:
+                prev_exceeds_14pi_count = exceeds_14pi_count
+                self.exceeds_14_pi_text.set(f"Exceeds 14pi: {exceeds_14pi_count}")
+            
+            if exceeds_length_count != prev_exceeds_length_count:
+                prev_exceeds_length_count = exceeds_length_count
+                self.exceeds_max_length_text.set(f"Exceeds Max Length: {exceeds_length_count}")
+            
+            if passed_count != prev_passed_count:
+                prev_passed_count = passed_count
+                self.passed_text.set(f"Passed: {passed_count}")
 
     def open_files_folder(self) -> None:
         if(os.name == "nt"):

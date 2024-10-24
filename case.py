@@ -28,7 +28,7 @@ def get_cases(folder_path:str) -> list[Case]:
     if(os.path.exists(folder_path)):
         for file in os.listdir(folder_path):
             file_name = case_regex.match(file)
-            if(file_name):
+            if(file_name and file_name.group('file_type') == '.stl'):
                 name:str=file_name.group(0)
                 stl_file:stl.STLObject = stl.open_stl_file(os.path.join(folder_path, file_name.group(0)))
                 circle:str = ""
