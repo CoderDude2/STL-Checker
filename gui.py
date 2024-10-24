@@ -94,6 +94,7 @@ class Checker(threading.Thread):
 class App:
     def __init__(self) -> None:
         self.master:tk.Tk = tk.Tk()
+        self.master.iconbitmap(os.path.join(ROOT_DIR, "resources", "icon.ico"))
         self.master.title("STL Checker")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
