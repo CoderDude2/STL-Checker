@@ -67,17 +67,17 @@ class Checker(threading.Thread):
                             shutil.move(
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(UNCENTERED_PATH, c.name)
-                                    ) 
-                        elif(not c.stl.in_circle_10pi() and c.circle == "10pi"):
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(OVER_10_PI_PATH, c.name)
-                                )
+                                    )
                         elif(not c.stl.in_circle_14pi() and c.circle == "14pi"):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(OVER_14_PI_PATH, c.name)
                             )
+                        elif(not c.stl.in_circle_10pi() and c.circle == "10pi"):
+                            shutil.move(
+                                os.path.join(FILES_PATH, c.name),
+                                os.path.join(OVER_10_PI_PATH, c.name)
+                                )
                         elif(c.stl.length() > c.max_length):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
