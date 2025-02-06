@@ -56,7 +56,7 @@ def get_cases(folder_path:str) -> list[Case]:
                 elif("ASC" in file_name.group("connection_type")):
                     case_type = CaseType.ASC
                 else:
-                    case_type = CaseType.ASC
+                    case_type = CaseType.DS
 
                 c:Case = Case(name, stl_file, file_name.group("PDO"), file_name.group("connection_type"), circle, case_type, max_length)
                 cases.append(c)
