@@ -5,9 +5,9 @@ import shutil
 import threading
 import tkinter as tk
 from pathlib import Path
-import time
 
 import case
+from case import CaseType
 import checks
 
 
@@ -19,6 +19,8 @@ UNCENTERED_PATH:str = os.path.join(ROOT_DIR, "output/uncentered")
 OVER_10_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_10_pi")
 OVER_14_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_14_pi")
 EXCEEDS_MAX_LENGTH_PATH:str = os.path.join(ROOT_DIR, "output/exceeds_max_length")
+MISSING_UG_VALUES_PATH:str = os.path.join(ROOT_DIR, "output/missing_ug_values")
+INCORRECT_104_VALUE_PATH:str = os.path.join(ROOT_DIR, "output/incorrect_104_value")
 PASSED_PATH:str = os.path.join(ROOT_DIR, "output/passed")
 
 if(not os.path.exists(OUTPUT_FOLDER_PATH)):
@@ -38,6 +40,12 @@ if(not os.path.exists(OVER_14_PI_PATH)):
 
 if(not os.path.exists(EXCEEDS_MAX_LENGTH_PATH)):
     os.mkdir(EXCEEDS_MAX_LENGTH_PATH)
+
+if(not os.path.exists(MISSING_UG_VALUES_PATH)):
+    os.mkdir(MISSING_UG_VALUES_PATH)
+
+if(not os.path.exists(INCORRECT_104_VALUE_PATH)):
+    os.mkdir(INCORRECT_104_VALUE_PATH)
 
 if(not os.path.exists(PASSED_PATH)):
     os.mkdir(PASSED_PATH)
@@ -60,7 +68,6 @@ class Checker(threading.Thread):
         if(self.is_checking):
             with file_processing_lock:
                 cases:list[case.Case] = case.get_cases(FILES_PATH)
-                
                 for c in cases:
                     try:
                         if(not checks.is_centered(c.stl)):
@@ -68,26 +75,50 @@ class Checker(threading.Thread):
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(UNCENTERED_PATH, c.name)
                                     )
-                        elif(not c.stl.in_circle_14pi() and c.circle == "14pi"):
+                            continue
+                        if(c.stl.in_circle_14pi()):
+                            if(c.circle == "10pi" and not c.stl.in_circle_10pi()):
+                                shutil.move(
+                                    os.path.join(FILES_PATH, c.name),
+                                    os.path.join(OVER_10_PI_PATH, c.name)
+                                )
+                                continue
+                        else:
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(OVER_14_PI_PATH, c.name)
                             )
-                        elif(not c.stl.in_circle_10pi() and c.circle == "10pi"):
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(OVER_10_PI_PATH, c.name)
-                                )
-                        elif(c.stl.length() > c.max_length):
+                            continue       
+                            
+                        if(c.stl.length() > c.max_length):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(EXCEEDS_MAX_LENGTH_PATH, c.name)
                             )
-                        else:
+                            continue
+
+                        if(c.case_type == CaseType.ASC and c.ug_values == None):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
-                                os.path.join(PASSED_PATH, c.name)
+                                os.path.join(MISSING_UG_VALUES_PATH, c.name)
                             )
+                            continue
+
+                        if(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
+                            if c.ug_values == None:
+                                shutil.move(
+                                    os.path.join(FILES_PATH, c.name),
+                                    os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                                )
+                                continue
+                            else:
+                                if(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
+                                    shutil.move(
+                                    os.path.join(FILES_PATH, c.name),
+                                    os.path.join(INCORRECT_104_VALUE_PATH, c.name)
+                                )
+                                continue
+                        shutil.move(os.path.join(FILES_PATH, c.name),os.path.join(PASSED_PATH, c.name))
                     except FileNotFoundError:
                         print("Could not find file", c.name)
                 self.is_checking = False
@@ -109,6 +140,8 @@ class App:
         self.exceeds_10_pi_text:tk.StringVar = tk.StringVar(value="Exceeds 10pi: 0")
         self.exceeds_14_pi_text:tk.StringVar = tk.StringVar(value="Exceeds 14pi: 0")
         self.exceeds_max_length_text:tk.StringVar = tk.StringVar(value="Exceeds Max Length: 0")
+        self.missing_ug_values_text:tk.StringVar = tk.StringVar(value="Missing UG Values: 0")
+        self.incorrect_104_value_text:tk.StringVar = tk.StringVar(value="Incorrect 104 Value: 0")
         self.passed_text:tk.StringVar = tk.StringVar(value="Passed: 0")
 
         self.add_files_btn:tk.Button = tk.Button(text="Add Files", command=self.open_files_folder)
@@ -120,12 +153,16 @@ class App:
         self.exceeds_10_pi_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_10_pi_text)
         self.exceeds_14_pi_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_14_pi_text)
         self.exceeds_max_length_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_max_length_text)
+        self.missing_ug_values_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.missing_ug_values_text)
+        self.incorrect_104_value_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.incorrect_104_value_text)
         self.passed_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.passed_text)
 
         self.uncentered_lbl.pack(anchor="w")
         self.exceeds_10_pi_lbl.pack(anchor="w")
         self.exceeds_14_pi_lbl.pack(anchor="w")
         self.exceeds_max_length_lbl.pack(anchor="w")
+        self.missing_ug_values_lbl.pack(anchor="w")
+        self.incorrect_104_value_lbl.pack(anchor="w")
         self.passed_lbl.pack(anchor="w")
 
         self.add_files_btn.pack(fill="x")
@@ -139,6 +176,8 @@ class App:
         prev_exceeds_10pi_count = 0
         prev_exceeds_14pi_count = 0
         prev_exceeds_length_count = 0
+        prev_missing_ug_values_count = 0
+        prev_incorrect_104_value_count = 0
         prev_passed_count = 0
 
         while True:
@@ -146,6 +185,8 @@ class App:
             exceeds_10pi_count = len([file for file in os.listdir(OVER_10_PI_PATH) if ".stl" in file.lower()])
             exceeds_14pi_count = len([file for file in os.listdir(OVER_14_PI_PATH) if ".stl" in file.lower()])
             exceeds_length_count = len([file for file in os.listdir(EXCEEDS_MAX_LENGTH_PATH) if ".stl" in file.lower()])
+            missing_ug_values_count = len([file for file in os.listdir(MISSING_UG_VALUES_PATH) if ".stl" in file.lower()])
+            incorrect_104_value_count = len([file for file in os.listdir(INCORRECT_104_VALUE_PATH) if ".stl" in file.lower()])
             passed_count = len([file for file in os.listdir(PASSED_PATH) if ".stl" in file.lower()])
 
             if uncentered_count != prev_uncentered_count:
@@ -164,6 +205,14 @@ class App:
                 prev_exceeds_length_count = exceeds_length_count
                 self.exceeds_max_length_text.set(f"Exceeds Max Length: {exceeds_length_count}")
             
+            if missing_ug_values_count != prev_missing_ug_values_count:
+                prev_missing_ug_values_count = missing_ug_values_count
+                self.missing_ug_values_text.set(f"Missing UG Values: {missing_ug_values_count}")
+
+            if incorrect_104_value_count != prev_incorrect_104_value_count:
+                prev_incorrect_104_value_count = incorrect_104_value_count
+                self.incorrect_104_value_text.set(f"Incorrect 104 Value: {incorrect_104_value_count}")
+
             if passed_count != prev_passed_count:
                 prev_passed_count = passed_count
                 self.passed_text.set(f"Passed: {passed_count}")

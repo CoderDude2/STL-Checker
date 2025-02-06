@@ -1,13 +1,20 @@
 # Author: Isaac J. Boots
 
 from dataclasses import dataclass
+from enum import Enum
 import os
 import re
 
 import stl
 
+CaseType = Enum('CaseType', names=[
+    "DS",
+    "ASC",
+    "TLOC",
+    "AOT"
+])
 
-case_regex:re.Pattern = re.compile(r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection_type>[A-Za-z0-9;\-]+),(?P<id>\d+)\)\[?(?P<angle>[A-Za-z0-9\.\-#= ]+)?\]?(?P<file_type>\.\w+)")
+case_regex:re.Pattern = re.compile(r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection_type>[A-Za-z0-9;\-]+),(?P<id>\d+)\)\[?(?P<ug_values>[A-Za-z0-9\.\-#= ]+)?\]?(?P<file_type>\.\w+)")
 fourteen_millimeter:list[str] = ["NDG-CS", "NDC-CS", "MCN-CS", "MCS-CS", "MCW-CS", "SXR-CS", "SXW-CS", "MRD-CS"]
 
 @dataclass
@@ -19,6 +26,7 @@ class Case:
     circle:str
     case_type:str
     max_length:float
+    ug_values:dict
 
     def __str__(self) -> str:
         return f'{self.pdo} {self.connection}'
@@ -34,6 +42,7 @@ def get_cases(folder_path:str) -> list[Case]:
                 circle:str = ""
                 case_type:str = ""
                 max_length:float = 14.2 if any([i in file_name.group("connection_type") for i in fourteen_millimeter]) else 17.2
+                ug_values = {entry[0]:float(entry[1]) for entry in list(map(lambda i:i.split("="),file_name.group("ug_values").split(" ")))} if file_name.group("ug_values") else None
 
                 if("TA14" in file_name.group("connection_type") or "TC14" in file_name.group("connection_type")):
                     circle = "14pi"
@@ -43,14 +52,23 @@ def get_cases(folder_path:str) -> list[Case]:
                     circle = "14pi"
 
                 if("T-L" in file_name.group("connection_type")):
-                    case_type = "TLOC"
+                    case_type = CaseType.TLOC
                 elif("AOT" in file_name.group("connection_type")):
-                    case_type = "AOT"
+                    case_type = CaseType.AOT
                 elif("ASC" in file_name.group("connection_type")):
-                    case_type = "ASC"
+                    case_type = CaseType.ASC
                 else:
-                    case_type = "DS"
+                    case_type = CaseType.DS
 
-                c:Case = Case(name, stl_file, file_name.group("PDO"), file_name.group("connection_type"), circle, case_type, max_length)
+                c:Case = Case(
+                    name, 
+                    stl_file, 
+                    file_name.group("PDO"), 
+                    file_name.group("connection_type"), 
+                    circle, 
+                    case_type, 
+                    max_length,
+                    ug_values)
+                
                 cases.append(c)
     return cases
