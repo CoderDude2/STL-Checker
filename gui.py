@@ -5,7 +5,6 @@ import shutil
 import threading
 import tkinter as tk
 from pathlib import Path
-import time
 
 import case
 import checks
