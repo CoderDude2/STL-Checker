@@ -26,6 +26,7 @@ class Case:
     circle:str
     case_type:str
     max_length:float
+    ug_values:dict
 
     def __str__(self) -> str:
         return f'{self.pdo} {self.connection}'
@@ -58,6 +59,14 @@ def get_cases(folder_path:str) -> list[Case]:
                 else:
                     case_type = CaseType.DS
 
-                c:Case = Case(name, stl_file, file_name.group("PDO"), file_name.group("connection_type"), circle, case_type, max_length)
+                c:Case = Case(
+                    name, 
+                    stl_file, 
+                    file_name.group("PDO"), 
+                    file_name.group("connection_type"), 
+                    circle, 
+                    case_type, 
+                    max_length)
+                
                 cases.append(c)
     return cases
