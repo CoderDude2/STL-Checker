@@ -18,6 +18,8 @@ UNCENTERED_PATH:str = os.path.join(ROOT_DIR, "output/uncentered")
 OVER_10_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_10_pi")
 OVER_14_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_14_pi")
 EXCEEDS_MAX_LENGTH_PATH:str = os.path.join(ROOT_DIR, "output/exceeds_max_length")
+MISSING_UG_VALUES_PATH:str = os.path.join(ROOT_DIR, "output/missing_ug_values")
+INCORRECT_104_VALUE_PATH:str = os.path.join(ROOT_DIR, "output/incorrect_104_value")
 PASSED_PATH:str = os.path.join(ROOT_DIR, "output/passed")
 
 if(not os.path.exists(OUTPUT_FOLDER_PATH)):
@@ -37,6 +39,12 @@ if(not os.path.exists(OVER_14_PI_PATH)):
 
 if(not os.path.exists(EXCEEDS_MAX_LENGTH_PATH)):
     os.mkdir(EXCEEDS_MAX_LENGTH_PATH)
+
+if(not os.path.exists(MISSING_UG_VALUES_PATH)):
+    os.mkdir(MISSING_UG_VALUES_PATH)
+
+if(not os.path.exists(INCORRECT_104_VALUE_PATH)):
+    os.mkdir(INCORRECT_104_VALUE_PATH)
 
 if(not os.path.exists(PASSED_PATH)):
     os.mkdir(PASSED_PATH)
