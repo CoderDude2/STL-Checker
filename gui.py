@@ -68,7 +68,6 @@ class Checker(threading.Thread):
         if(self.is_checking):
             with file_processing_lock:
                 cases:list[case.Case] = case.get_cases(FILES_PATH)
-                
                 for c in cases:
                     try:
                         if(not checks.is_centered(c.stl)):
@@ -76,43 +75,50 @@ class Checker(threading.Thread):
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(UNCENTERED_PATH, c.name)
                                     )
-                        elif(not c.stl.in_circle_14pi() and c.circle == "14pi"):
+                            continue
+                        if(c.stl.in_circle_14pi()):
+                            if(c.circle == "10pi" and not c.stl.in_circle_10pi()):
+                                shutil.move(
+                                    os.path.join(FILES_PATH, c.name),
+                                    os.path.join(OVER_10_PI_PATH, c.name)
+                                )
+                                continue
+                        else:
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(OVER_14_PI_PATH, c.name)
                             )
-                        elif(not c.stl.in_circle_10pi() and c.circle == "10pi"):
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(OVER_10_PI_PATH, c.name)
-                                )
-                        elif(c.stl.length() > c.max_length):
+                            continue       
+                            
+                        if(c.stl.length() > c.max_length):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(EXCEEDS_MAX_LENGTH_PATH, c.name)
                             )
-                        elif(c.case_type == CaseType.ASC and c.ug_values == None):
+                            continue
+
+                        if(c.case_type == CaseType.ASC and c.ug_values == None):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(MISSING_UG_VALUES_PATH, c.name)
                             )
-                        elif(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
+                            continue
+
+                        if(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
                             if c.ug_values == None:
                                 shutil.move(
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(MISSING_UG_VALUES_PATH, c.name)
                                 )
+                                continue
                             else:
                                 if(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
                                     shutil.move(
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(INCORRECT_104_VALUE_PATH, c.name)
-                                ) 
-                        else:
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(PASSED_PATH, c.name)
-                            )
+                                )
+                                continue
+                        shutil.move(os.path.join(FILES_PATH, c.name),os.path.join(PASSED_PATH, c.name))
                     except FileNotFoundError:
                         print("Could not find file", c.name)
                 self.is_checking = False
