@@ -7,6 +7,7 @@ import tkinter as tk
 from pathlib import Path
 
 import case
+from case import CaseType
 import checks
 
 
@@ -90,6 +91,23 @@ class Checker(threading.Thread):
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(EXCEEDS_MAX_LENGTH_PATH, c.name)
                             )
+                        elif(c.case_type == CaseType.ASC and c.ug_values == None):
+                            shutil.move(
+                                os.path.join(FILES_PATH, c.name),
+                                os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                            )
+                        elif(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
+                            if c.ug_values == None:
+                                shutil.move(
+                                    os.path.join(FILES_PATH, c.name),
+                                    os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                                )
+                            else:
+                                if(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
+                                    shutil.move(
+                                    os.path.join(FILES_PATH, c.name),
+                                    os.path.join(INCORRECT_104_VALUE_PATH, c.name)
+                                ) 
                         else:
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
