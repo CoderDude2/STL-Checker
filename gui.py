@@ -128,7 +128,11 @@ class App:
         self.master:tk.Tk = tk.Tk()
         self.master.iconbitmap(os.path.join(ROOT_DIR, "resources", "icon.ico"))
         self.master.title("STL Checker")
+        self.master.option_add("*Font", "Arial 11")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.master.config(background="#dddddd")
+        self.master.geometry("250x404")
+        self.master.minsize(250,250)
 
         self.update_counters_thread = threading.Thread(target=self.update_counters, daemon=True)
 
@@ -136,39 +140,73 @@ class App:
         self.c.start()
         self.update_counters_thread.start()
 
-        self.uncentered_text:tk.StringVar = tk.StringVar(value="Uncentered: 0")
-        self.exceeds_10_pi_text:tk.StringVar = tk.StringVar(value="Exceeds 10pi: 0")
-        self.exceeds_14_pi_text:tk.StringVar = tk.StringVar(value="Exceeds 14pi: 0")
-        self.exceeds_max_length_text:tk.StringVar = tk.StringVar(value="Exceeds Max Length: 0")
-        self.missing_ug_values_text:tk.StringVar = tk.StringVar(value="Missing UG Values: 0")
-        self.incorrect_104_value_text:tk.StringVar = tk.StringVar(value="Incorrect 104 Value: 0")
-        self.passed_text:tk.StringVar = tk.StringVar(value="Passed: 0")
+        self.uncentered_counter:tk.IntVar = tk.IntVar(value=0)
+        self.exceeds_10_pi_counter:tk.IntVar = tk.IntVar(value=0)
+        self.exceeds_14_pi_counter:tk.IntVar = tk.IntVar(value=0)
+        self.exceeds_max_length_counter:tk.IntVar = tk.IntVar(value=0)
+        self.missing_ug_values_counter:tk.IntVar = tk.IntVar(value=0)
+        self.incorrect_104_value_counter:tk.IntVar = tk.IntVar(value=0)
+        self.passed_counter:tk.IntVar = tk.IntVar(value=0)
 
         self.add_files_btn:tk.Button = tk.Button(text="Add Files", command=self.open_files_folder)
         self.process_files_btn:tk.Button = tk.Button(text="Process Files", command=self.c.start_processing)
         self.open_output_btn:tk.Button = tk.Button(text="Open Output Folder", width=20, command=self.open_output_folder)
 
         self.label_frame:tk.Frame = tk.Frame(master=self.master)
-        self.uncentered_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.uncentered_text)
-        self.exceeds_10_pi_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_10_pi_text)
-        self.exceeds_14_pi_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_14_pi_text)
-        self.exceeds_max_length_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_max_length_text)
-        self.missing_ug_values_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.missing_ug_values_text)
-        self.incorrect_104_value_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.incorrect_104_value_text)
-        self.passed_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.passed_text)
+        self.label_frame.option_add("*Label.Background", "#dddddd")
+        self.label_frame.grid_rowconfigure(list(range(7)), weight=1, uniform="Silent_Creme")
+        self.label_frame.grid_columnconfigure(0, weight=1)
+        self.spacer_frame:tk.Frame = tk.Frame(master=self.label_frame, width=20)
 
-        self.uncentered_lbl.pack(anchor="w")
-        self.exceeds_10_pi_lbl.pack(anchor="w")
-        self.exceeds_14_pi_lbl.pack(anchor="w")
-        self.exceeds_max_length_lbl.pack(anchor="w")
-        self.missing_ug_values_lbl.pack(anchor="w")
-        self.incorrect_104_value_lbl.pack(anchor="w")
-        self.passed_lbl.pack(anchor="w")
+        self.uncentered_lbl:tk.Label = tk.Label(master=self.label_frame, text="Uncentered", anchor="w")
+        self.uncentered_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.uncentered_counter, width=5)
 
-        self.add_files_btn.pack(fill="x")
-        self.process_files_btn.pack(fill="x")
-        self.label_frame.pack(fill="x", pady=20)
-        self.open_output_btn.pack(fill="x", side=tk.BOTTOM)
+        self.exceeds_10_pi_lbl:tk.Label = tk.Label(master=self.label_frame, text="Exceeds 10pi", anchor="w")
+        self.exceeds_10_pi_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_10_pi_counter)
+
+        self.exceeds_14_pi_lbl:tk.Label = tk.Label(master=self.label_frame, text="Exceeds 14pi", anchor="w")
+        self.exceeds_14_pi_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_14_pi_counter)
+
+        self.exceeds_max_length_lbl:tk.Label = tk.Label(master=self.label_frame, text="Exceeds Max Length", anchor="w")
+        self.exceeds_max_length_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_max_length_counter)
+
+        self.missing_ug_values_lbl:tk.Label = tk.Label(master=self.label_frame, text="Missing UG Values", anchor="w")
+        self.missing_ug_values_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.missing_ug_values_counter)
+
+        self.incorrect_104_value_lbl:tk.Label = tk.Label(master=self.label_frame, text="Incorrect 104 Value", anchor="w")
+        self.incorrect_104_value_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.incorrect_104_value_counter)
+
+        self.passed_lbl:tk.Label = tk.Label(master=self.label_frame, text="Passed", anchor="w")
+        self.passed_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.passed_counter)
+
+        self.uncentered_lbl.grid(row=0, column=0, sticky="nsew")
+        self.uncentered_count_lbl.grid(row=0, column=1, sticky="nsew")
+
+        self.exceeds_10_pi_lbl.grid(row=1, column=0, sticky="nsew")
+        self.exceeds_10_pi_count_lbl.grid(row=1, column=1, sticky="nsew")
+
+        self.exceeds_14_pi_lbl.grid(row=2, column=0, sticky="nsew")
+        self.exceeds_14_pi_count_lbl.grid(row=2, column=1, sticky="nsew")
+
+        self.exceeds_max_length_lbl.grid(row=3, column=0, sticky="nsew")
+        self.exceeds_max_length_count_lbl.grid(row=3, column=1, sticky="nsew")
+
+        self.missing_ug_values_lbl.grid(row=4, column=0, sticky="nsew")
+        self.missing_ug_values_count_lbl.grid(row=4, column=1, sticky="nsew")
+
+        self.incorrect_104_value_lbl.grid(row=5, column=0, sticky="nsew")
+        self.incorrect_104_value_count_lbl.grid(row=5, column=1, sticky="nsew")
+
+        self.passed_lbl.grid(row=6, column=0, sticky="nsew")
+        self.passed_count_lbl.grid(row=6, column=1, sticky="nsew")
+
+        self.master.grid_rowconfigure(2, weight=1)
+        self.master.grid_columnconfigure(0, weight=1)
+
+        self.add_files_btn.grid(row=0, column=0, sticky="we")
+        self.process_files_btn.grid(row=1, column=0, sticky="we")
+        self.label_frame.grid(row=2, column=0, sticky="nswe", padx=5)
+        self.open_output_btn.grid(row=3, column=0, sticky="we")
 
 
     def update_counters(self) -> None:
@@ -191,31 +229,31 @@ class App:
 
             if uncentered_count != prev_uncentered_count:
                 prev_uncentered_count = uncentered_count
-                self.uncentered_text.set(f"Uncentered: {uncentered_count}")
+                self.uncentered_counter.set(uncentered_count)
             
             if exceeds_10pi_count != prev_exceeds_10pi_count:
                 prev_exceeds_10pi_count = exceeds_10pi_count
-                self.exceeds_10_pi_text.set(f"Exceeds 10pi: {exceeds_10pi_count}")
+                self.exceeds_10_pi_counter.set(exceeds_10pi_count)
             
             if exceeds_14pi_count != prev_exceeds_14pi_count:
                 prev_exceeds_14pi_count = exceeds_14pi_count
-                self.exceeds_14_pi_text.set(f"Exceeds 14pi: {exceeds_14pi_count}")
+                self.exceeds_14_pi_counter.set(exceeds_14pi_count)
             
             if exceeds_length_count != prev_exceeds_length_count:
                 prev_exceeds_length_count = exceeds_length_count
-                self.exceeds_max_length_text.set(f"Exceeds Max Length: {exceeds_length_count}")
+                self.exceeds_max_length_counter.set(exceeds_length_count)
             
             if missing_ug_values_count != prev_missing_ug_values_count:
                 prev_missing_ug_values_count = missing_ug_values_count
-                self.missing_ug_values_text.set(f"Missing UG Values: {missing_ug_values_count}")
+                self.missing_ug_values_counter.set(missing_ug_values_count)
 
             if incorrect_104_value_count != prev_incorrect_104_value_count:
                 prev_incorrect_104_value_count = incorrect_104_value_count
-                self.incorrect_104_value_text.set(f"Incorrect 104 Value: {incorrect_104_value_count}")
+                self.incorrect_104_value_counter.set(incorrect_104_value_count)
 
             if passed_count != prev_passed_count:
                 prev_passed_count = passed_count
-                self.passed_text.set(f"Passed: {passed_count}")
+                self.passed_counter.set(passed_count)
 
     def open_files_folder(self) -> None:
         if(os.name == "nt"):
