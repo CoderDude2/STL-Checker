@@ -42,6 +42,7 @@ def get_cases(folder_path:str) -> list[Case]:
                 circle:str = ""
                 case_type:str = ""
                 max_length:float = 14.2 if any([i in file_name.group("connection_type") for i in fourteen_millimeter]) else 17.2
+                ug_values = {entry[0]:float(entry[1]) for entry in list(map(lambda i:i.split("="),file_name.group("ug_values").split(" ")))} if file_name.group("ug_values") else None
 
                 if("TA14" in file_name.group("connection_type") or "TC14" in file_name.group("connection_type")):
                     circle = "14pi"
@@ -66,7 +67,8 @@ def get_cases(folder_path:str) -> list[Case]:
                     file_name.group("connection_type"), 
                     circle, 
                     case_type, 
-                    max_length)
+                    max_length,
+                    ug_values)
                 
                 cases.append(c)
     return cases
