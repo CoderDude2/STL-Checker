@@ -1,11 +1,9 @@
 # Author: Isaac J. Boots
 
-import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 
 import stl
-
 
 def normalize(vector:npt.ArrayLike) -> npt.ArrayLike:
     if(np.dot(vector, vector) > 0):
@@ -77,93 +75,3 @@ def is_centered(stl_object:stl.STLObject) -> bool:
         return True
     
     return False
-
-def is_centered_visualized(stl_object:stl.STLObject) -> None:
-    x_ray_origin:npt.ArrayLike = np.array([20,0,2])
-    x_ray_direction:npt.ArrayLike = normalize(x_ray_origin - np.array([0,0,0]))
-
-    y_ray_origin:npt.ArrayLike = np.array([0,20,2])
-    y_ray_direction:npt.ArrayLike = normalize(y_ray_origin - np.array([0,0,0]))
-
-    z_ray_origin:npt.ArrayLike = np.array([0,0,20])
-    z_ray_direction:npt.ArrayLike = normalize(z_ray_origin - np.array([0,0,0]))
-
-    fig:plt.Figure = plt.figure()
-    ax:plt.Axes = fig.add_subplot(111, projection='3d')
-
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-
-    x:list[float] = []
-    y:list[float] = []
-    z:list[float] = []
-
-    int_x_0:list[float] = []
-    int_y_0:list[float] = []
-    int_z_0:list[float] = []
-
-    int_x_1:list[float] = []
-    int_y_1:list[float] = []
-    int_z_1:list[float] = []
-
-    int_x_2:list[float] = []
-    int_y_2:list[float] = []
-    int_z_2:list[float] = []
-
-    ax.plot(0,0,0,'o', color="green")
-    for facet in stl_object.facets:
-        if(intersect_triangle(x_ray_origin, x_ray_direction, facet.v1, facet.v2, facet.v3)):
-            int_x_0.append(facet.v1[0])
-            int_x_0.append(facet.v2[0])
-            int_x_0.append(facet.v3[0])
-
-            int_y_0.append(facet.v1[1])
-            int_y_0.append(facet.v2[1])
-            int_y_0.append(facet.v3[1])
-
-            int_z_0.append(facet.v1[2])
-            int_z_0.append(facet.v2[2])
-            int_z_0.append(facet.v3[2])
-        elif(intersect_triangle(y_ray_origin, y_ray_direction, facet.v1, facet.v2, facet.v3)):
-            int_x_1.append(facet.v1[0])
-            int_x_1.append(facet.v2[0])
-            int_x_1.append(facet.v3[0])
-
-            int_y_1.append(facet.v1[1])
-            int_y_1.append(facet.v2[1])
-            int_y_1.append(facet.v3[1])
-
-            int_z_1.append(facet.v1[2])
-            int_z_1.append(facet.v2[2])
-            int_z_1.append(facet.v3[2])
-        elif(intersect_triangle(z_ray_origin, z_ray_direction, facet.v1, facet.v2, facet.v3)):
-            int_x_2.append(facet.v1[0])
-            int_x_2.append(facet.v2[0])
-            int_x_2.append(facet.v3[0])
-
-            int_y_2.append(facet.v1[1])
-            int_y_2.append(facet.v2[1])
-            int_y_2.append(facet.v3[1])
-
-            int_z_2.append(facet.v1[2])
-            int_z_2.append(facet.v2[2])
-            int_z_2.append(facet.v3[2])
-        else:
-            x.append(facet.v1[0])
-            x.append(facet.v2[0])
-            x.append(facet.v3[0])
-
-            y.append(facet.v1[1])
-            y.append(facet.v2[1])
-            y.append(facet.v3[1])
-
-            z.append(facet.v1[2])
-            z.append(facet.v2[2])
-            z.append(facet.v3[2])
-            
-    ax.plot(x,y,z,'o',color="grey")
-    ax.plot(int_x_0, int_y_0, int_z_0, 'o', color="red")
-    ax.plot(int_x_1, int_y_1, int_z_1, 'o', color="green")
-    ax.plot(int_x_2, int_y_2, int_z_2, 'o', color="blue")
-    plt.show()
