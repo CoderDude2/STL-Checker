@@ -53,9 +53,10 @@ if(not os.path.exists(PASSED_PATH)):
 file_processing_lock:threading.Lock = threading.Lock()
 
 class Checker(threading.Thread):
-    def __init__(self) -> None:
+    def __init__(self, gui_app) -> None:
         threading.Thread.__init__(self, daemon=True)
         self.is_checking:bool = False
+        self.gui_app = gui_app
 
     def run(self) -> None:
         while True:
@@ -124,6 +125,7 @@ class Checker(threading.Thread):
                     except FileNotFoundError:
                         print("Could not find file", c.name)
                 self.is_checking = False
+                self.gui_app.done_processing_callback()
 
 class App:
     def __init__(self) -> None:
@@ -138,7 +140,7 @@ class App:
 
         self.update_counters_thread = threading.Thread(target=self.update_counters, daemon=True)
 
-        self.c:Checker = Checker()
+        self.c:Checker = Checker(self)
         self.c.start()
         self.update_counters_thread.start()
 
@@ -151,7 +153,7 @@ class App:
         self.passed_counter:tk.IntVar = tk.IntVar(value=0)
 
         self.add_files_btn:tk.Button = tk.Button(text="Add Files", command=self.open_files_folder)
-        self.process_files_btn:tk.Button = tk.Button(text="Process Files", command=self.c.start_processing)
+        self.process_files_btn:tk.Button = tk.Button(text="Process Files", command=self.start_processing_callback)
         self.open_output_btn:tk.Button = tk.Button(text="Open Output Folder", width=20, command=self.open_output_folder)
 
         self.label_frame:tk.Frame = tk.Frame(master=self.master)
@@ -210,6 +212,17 @@ class App:
         self.label_frame.grid(row=2, column=0, sticky="nswe", padx=5)
         self.open_output_btn.grid(row=3, column=0, sticky="we")
 
+    def start_processing_callback(self):
+        if len(os.listdir(FILES_PATH)) > 0:
+            self.master.config(cursor="watch")
+            self.master.title("STL-Checker (Processing)")
+            self.process_files_btn.config(state=tk.DISABLED, text="Processing...")
+            self.c.start_processing()
+
+    def done_processing_callback(self):
+        self.master.config(cursor="")
+        self.process_files_btn.config(state=tk.NORMAL, text="Process Files")
+        self.master.title("STL-Checker")
 
     def update_counters(self) -> None:
         prev_uncentered_count = 0
