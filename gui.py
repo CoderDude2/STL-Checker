@@ -105,7 +105,9 @@ class Checker(threading.Thread):
                             continue
 
                         if(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
-                            if c.ug_values == None:
+                            if c.ug_values == "":
+                                continue
+                            elif c.ug_values == None:
                                 shutil.move(
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(MISSING_UG_VALUES_PATH, c.name)
