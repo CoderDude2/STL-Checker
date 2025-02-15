@@ -14,7 +14,7 @@ CaseType = Enum('CaseType', names=[
     "AOT"
 ])
 
-case_regex:re.Pattern = re.compile(r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection_type>[A-Za-z0-9;\-]+),(?P<id>\d+)\)\[?(?P<ug_values>[A-Za-z0-9\.\-#= ]+)?\]?(?P<file_type>\.\w+)")
+case_regex:re.Pattern = re.compile(r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection_type>[A-Za-z0-9;\-]+),(?P<id>\d+)\) ?\[?(?P<ug_values>[#0-9=. ]+)?\]?[_0-9]*?(?P<file_type>\.\w+)")
 fourteen_millimeter:list[str] = ["NDG-CS", "NDC-CS", "MCN-CS", "MCS-CS", "MCW-CS", "SXR-CS", "SXW-CS", "MRD-CS"]
 
 @dataclass

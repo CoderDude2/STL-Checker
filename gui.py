@@ -5,6 +5,7 @@ import shutil
 import threading
 import tkinter as tk
 from pathlib import Path
+from multiprocessing import Pool
 
 import case
 from case import CaseType
@@ -49,90 +50,57 @@ if(not os.path.exists(INCORRECT_104_VALUE_PATH)):
 
 if(not os.path.exists(PASSED_PATH)):
     os.mkdir(PASSED_PATH)
-
-file_processing_lock:threading.Lock = threading.Lock()
-
-class Checker(threading.Thread):
-    def __init__(self, gui_app) -> None:
-        threading.Thread.__init__(self, daemon=True)
-        self.is_checking:bool = False
-        self.gui_app = gui_app
-
-    def run(self) -> None:
-        while True:
-            self.process_files()
-
-    def start_processing(self) -> None:
-        self.is_checking = True if self.is_checking == False else self.is_checking
         
-    def process_files(self) -> None:
-        if(self.is_checking):
-            with file_processing_lock:
-                cases:list[case.Case] = case.get_cases(FILES_PATH)
-                for c in cases:
-                    try:
-                        if(not checks.is_centered(c.stl)):
-                            shutil.move(
-                                    os.path.join(FILES_PATH, c.name),
-                                    os.path.join(UNCENTERED_PATH, c.name)
-                                    )
-                            continue
+def process_file(c:case.Case) -> None:
+    src = os.path.join(FILES_PATH, c.name)
+    dst = ""
+    try:
+        if(not checks.is_centered(c.stl)):
+            dst = os.path.join(UNCENTERED_PATH, c.name)
+            return (src, dst)
+        elif not checks.in_circle(c.stl, 7):
+            dst = os.path.join(OVER_14_PI_PATH, c.name)
+            return (src, dst)
+        elif not checks.in_circle(c.stl, 5):
+            dst = os.path.join(OVER_10_PI_PATH, c.name)
+            return (src, dst)
+        elif(c.stl.length() > c.max_length):
+            dst = os.path.join(EXCEEDS_MAX_LENGTH_PATH, c.name)
+            return (src, dst)
+        elif(c.case_type == CaseType.ASC and c.ug_values == None):
+            dst = os.path.join(MISSING_UG_VALUES_PATH, c.name)
+            return (src, dst)
+        elif(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
+            if c.ug_values == "":
+                dst = os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                return (src, dst)
+            elif c.ug_values == None:
+                dst = os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                return (src, dst)
+            elif(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
+                dst = os.path.join(INCORRECT_104_VALUE_PATH, c.name)
+                return (src, dst)
+        else:
+            dst = os.path.join(PASSED_PATH, c.name)
+            return (src, dst)
+    except FileNotFoundError:
+        print("Could not find file", c.name)
 
-                        if checks.in_circle(c.stl, 7):
-                            if(c.circle == "10pi" and not checks.in_circle(c.stl, 5)):
-                                shutil.move(
-                                    os.path.join(FILES_PATH, c.name),
-                                    os.path.join(OVER_10_PI_PATH, c.name)
-                                )
-                                continue
-                        else:
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(OVER_14_PI_PATH, c.name)
-                            )
-                            continue  
+def process_files(gui_app):
+    with Pool() as pool:
+        result = pool.imap_unordered(process_file, case.get_cases(FILES_PATH))
 
-                        if(c.stl.length() > c.max_length):
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(EXCEEDS_MAX_LENGTH_PATH, c.name)
-                            )
-                            continue
-
-                        if(c.case_type == CaseType.ASC and c.ug_values == None):
-                            shutil.move(
-                                os.path.join(FILES_PATH, c.name),
-                                os.path.join(MISSING_UG_VALUES_PATH, c.name)
-                            )
-                            continue
-
-                        if(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
-                            if c.ug_values == "":
-                                continue
-                            elif c.ug_values == None:
-                                shutil.move(
-                                    os.path.join(FILES_PATH, c.name),
-                                    os.path.join(MISSING_UG_VALUES_PATH, c.name)
-                                )
-                                continue
-                            else:
-                                if(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
-                                    shutil.move(
-                                    os.path.join(FILES_PATH, c.name),
-                                    os.path.join(INCORRECT_104_VALUE_PATH, c.name)
-                                )
-                                continue
-                        shutil.move(os.path.join(FILES_PATH, c.name),os.path.join(PASSED_PATH, c.name))
-                    except FileNotFoundError:
-                        print("Could not find file", c.name)
-                self.is_checking = False
-                self.gui_app.done_processing_callback()
+        for src, dst in result:
+            shutil.move(src, dst)
+    gui_app.done_processing_callback()
+    
+    return
 
 class App:
     def __init__(self) -> None:
         self.master:tk.Tk = tk.Tk()
         self.master.iconbitmap(os.path.join(ROOT_DIR, "resources", "icon.ico"))
-        self.master.title("STL Checker")
+        self.master.title("STL-Checker")
         self.master.option_add("*Font", "Arial 11")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
         self.master.config(background="#dddddd")
@@ -140,9 +108,6 @@ class App:
         self.master.minsize(250,250)
 
         self.update_counters_thread = threading.Thread(target=self.update_counters, daemon=True)
-
-        self.c:Checker = Checker(self)
-        self.c.start()
         self.update_counters_thread.start()
 
         self.uncentered_counter:tk.IntVar = tk.IntVar(value=0)
@@ -214,11 +179,13 @@ class App:
         self.open_output_btn.grid(row=3, column=0, sticky="we")
 
     def start_processing_callback(self):
-        if len(os.listdir(FILES_PATH)) > 0:
-            self.master.config(cursor="watch")
-            self.master.title("STL-Checker (Processing)")
-            self.process_files_btn.config(state=tk.DISABLED, text="Processing...")
-            self.c.start_processing()
+        self.master.config(cursor="watch")
+        self.master.title("STL-Checker (Processing)")
+        self.process_files_btn.config(state=tk.DISABLED, text="Processing...")
+
+        t = threading.Thread(target=process_files, args=(self, ))
+        t.setDaemon(True)
+        t.start()
 
     def done_processing_callback(self):
         self.master.config(cursor="")
