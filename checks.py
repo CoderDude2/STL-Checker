@@ -10,6 +10,9 @@ def normalize(vector:npt.ArrayLike) -> npt.ArrayLike:
         return vector / np.sqrt(np.dot(vector, vector))
     return vector
 
+def distance_from_origin(point:np.array) -> float:
+    return np.sqrt(point[0]**2 + point[1]**2)
+
 def intersect_triangle(ray_origin:npt.ArrayLike, 
                        ray_direction:npt.ArrayLike,
                        v0:npt.ArrayLike, 
@@ -75,3 +78,16 @@ def is_centered(stl_object:stl.STLObject) -> bool:
         return True
     
     return False
+
+def in_circle(stl_file:stl.STLObject, radius:int) -> bool:
+    for facet in stl_file.facets:
+        p1:npt.ArrayLike = np.array([facet.v1[0], facet.v1[1]])
+        p2:npt.ArrayLike = np.array([facet.v2[0], facet.v2[1]])
+        p3:npt.ArrayLike = np.array([facet.v3[0], facet.v3[1]])
+        if(distance_from_origin(p1) >= radius):
+            return False
+        if(distance_from_origin(p2) >= radius):
+            return False
+        if(distance_from_origin(p3) >= radius):
+            return False
+        return True
