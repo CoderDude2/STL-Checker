@@ -20,32 +20,6 @@ class STLObject:
     header:bytes
     facet_count:int
     facets:list[Facet]
-
-    def in_circle_10pi(self) -> bool:
-        for facet in self.facets:
-            p1:npt.ArrayLike = np.array([facet.v1[0], facet.v1[1]])
-            p2:npt.ArrayLike = np.array([facet.v2[0], facet.v2[1]])
-            p3:npt.ArrayLike = np.array([facet.v3[0], facet.v3[1]])
-            if(distance_from_origin(p1) >= 5):
-                return False
-            if(distance_from_origin(p2) >= 5):
-                return False
-            if(distance_from_origin(p3) >= 5):
-                return False
-        return True
-    
-    def in_circle_14pi(self) -> bool:
-        for facet in self.facets:
-            p1:npt.ArrayLike = np.array([facet.v1[0], facet.v1[1]])
-            p2:npt.ArrayLike = np.array([facet.v2[0], facet.v2[1]])
-            p3:npt.ArrayLike = np.array([facet.v3[0], facet.v3[1]])
-            if(distance_from_origin(p1) >= 7):
-                return False
-            if(distance_from_origin(p2) >= 7):
-                return False
-            if(distance_from_origin(p3) >= 7):
-                return False
-        return True
     
     def length(self) -> float:
         min_z:float = self.facets[0].v1[2]
@@ -96,9 +70,6 @@ def read_facet(file_stream:io.BufferedReader) -> Facet:
     )
 
     return f
-
-def distance_from_origin(point:np.array) -> float:
-    return np.sqrt(point[0]**2 + point[1]**2)
 
 def open_stl_file(file_path:str) -> STLObject:
     stl_file:io.BufferedReader = open(file_path, 'rb')

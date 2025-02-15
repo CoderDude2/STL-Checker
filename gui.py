@@ -77,8 +77,9 @@ class Checker(threading.Thread):
                                     os.path.join(UNCENTERED_PATH, c.name)
                                     )
                             continue
-                        if(c.stl.in_circle_14pi()):
-                            if(c.circle == "10pi" and not c.stl.in_circle_10pi()):
+
+                        if checks.in_circle(c.stl, 7):
+                            if(c.circle == "10pi" and not checks.in_circle(c.stl, 5)):
                                 shutil.move(
                                     os.path.join(FILES_PATH, c.name),
                                     os.path.join(OVER_10_PI_PATH, c.name)
@@ -89,8 +90,8 @@ class Checker(threading.Thread):
                                 os.path.join(FILES_PATH, c.name),
                                 os.path.join(OVER_14_PI_PATH, c.name)
                             )
-                            continue       
-                            
+                            continue  
+
                         if(c.stl.length() > c.max_length):
                             shutil.move(
                                 os.path.join(FILES_PATH, c.name),
