@@ -90,4 +90,4 @@ def in_circle(stl_file:stl.STLObject, radius:int) -> bool:
             return False
         if(distance_from_origin(p3) >= radius):
             return False
-        return True
+    return True
