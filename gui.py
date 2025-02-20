@@ -80,9 +80,8 @@ def process_file(c:case.Case) -> None:
             elif(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
                 dst = os.path.join(INCORRECT_104_VALUE_PATH, c.name)
                 return (src, dst)
-        else:
-            dst = os.path.join(PASSED_PATH, c.name)
-            return (src, dst)
+        dst = os.path.join(PASSED_PATH, c.name)
+        return (src, dst)
     except FileNotFoundError:
         print("Could not find file", c.name)
 
