@@ -1,7 +1,8 @@
 # Author: Isaac J. Boots
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from collections import namedtuple
+from typing import Generator
 from enum import Enum
 from pathlib import Path
 import re
@@ -33,9 +34,7 @@ class Case:
     def __str__(self) -> str:
         return f'{self.pdo} {self.connection}'
 
-def get_cases(folder_path:Path) -> list[Case]:
-    cases:list[Case] = []
-
+def get_cases(folder_path:Path) -> Generator[Case, None, None]:
     if folder_path.exists():
         for file in folder_path.iterdir():
             file_regex_match = case_regex.match(file.name)
@@ -99,8 +98,7 @@ def get_cases(folder_path:Path) -> list[Case]:
                                 except ValueError:
                                     val_105 = None
                     abutment_case.ug_values = UG(val_101, val_102, val_103, val_104, val_105)
-                cases.append(abutment_case)
-    return cases
+                yield abutment_case
 
 if __name__ == "__main__":
     abutments = get_cases(Path("./files"))
