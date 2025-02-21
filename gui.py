@@ -6,6 +6,7 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from multiprocessing import Pool
+import subprocess
 
 import case
 from case import CaseType
@@ -14,73 +15,74 @@ import checks
 
 ROOT_DIR = Path(__file__).resolve().parent
 
-OUTPUT_FOLDER_PATH:str = os.path.join(ROOT_DIR, "output")
-FILES_PATH:str = os.path.join(ROOT_DIR, "files")
-UNCENTERED_PATH:str = os.path.join(ROOT_DIR, "output/uncentered")
-OVER_10_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_10_pi")
-OVER_14_PI_PATH:str = os.path.join(ROOT_DIR, "output/over_14_pi")
-EXCEEDS_MAX_LENGTH_PATH:str = os.path.join(ROOT_DIR, "output/exceeds_max_length")
-MISSING_UG_VALUES_PATH:str = os.path.join(ROOT_DIR, "output/missing_ug_values")
-INCORRECT_104_VALUE_PATH:str = os.path.join(ROOT_DIR, "output/incorrect_104_value")
-PASSED_PATH:str = os.path.join(ROOT_DIR, "output/passed")
+OUTPUT_FOLDER_PATH = Path(ROOT_DIR, "output")
+FILES_PATH = Path(ROOT_DIR, "files")
+UNCENTERED_PATH = Path(ROOT_DIR, "output/uncentered")
+OVER_10_PI_PATH = Path(ROOT_DIR, "output/over_10_pi")
+OVER_14_PI_PATH = Path(ROOT_DIR, "output/over_14_pi")
+EXCEEDS_MAX_LENGTH_PATH = Path(ROOT_DIR, "output/exceeds_max_length")
+MISSING_UG_VALUES_PATH = Path(ROOT_DIR, "output/missing_ug_values")
+INCORRECT_104_VALUE_PATH= Path(ROOT_DIR, "output/incorrect_104_value")
+PASSED_PATH = Path(ROOT_DIR, "output/passed")
 
-if(not os.path.exists(OUTPUT_FOLDER_PATH)):
-    os.mkdir(OUTPUT_FOLDER_PATH)
 
-if(not os.path.exists(FILES_PATH)):
-    os.mkdir(FILES_PATH)
+if not OUTPUT_FOLDER_PATH.exists():
+    OUTPUT_FOLDER_PATH.mkdir()
 
-if(not os.path.exists(UNCENTERED_PATH)):
-    os.mkdir(UNCENTERED_PATH)
+if not FILES_PATH.exists():
+    FILES_PATH.mkdir()
 
-if(not os.path.exists(OVER_10_PI_PATH)):
-    os.mkdir(OVER_10_PI_PATH)
+if not UNCENTERED_PATH.exists():
+    UNCENTERED_PATH.mkdir()
 
-if(not os.path.exists(OVER_14_PI_PATH)):
-    os.mkdir(OVER_14_PI_PATH)
+if not OVER_10_PI_PATH.exists():
+    OVER_10_PI_PATH.mkdir()
 
-if(not os.path.exists(EXCEEDS_MAX_LENGTH_PATH)):
-    os.mkdir(EXCEEDS_MAX_LENGTH_PATH)
+if not OVER_14_PI_PATH.exists():
+    OVER_14_PI_PATH.mkdir()
 
-if(not os.path.exists(MISSING_UG_VALUES_PATH)):
-    os.mkdir(MISSING_UG_VALUES_PATH)
+if not EXCEEDS_MAX_LENGTH_PATH.exists():
+    EXCEEDS_MAX_LENGTH_PATH.mkdir()
 
-if(not os.path.exists(INCORRECT_104_VALUE_PATH)):
-    os.mkdir(INCORRECT_104_VALUE_PATH)
+if not MISSING_UG_VALUES_PATH.exists():
+    MISSING_UG_VALUES_PATH.mkdir()
 
-if(not os.path.exists(PASSED_PATH)):
-    os.mkdir(PASSED_PATH)
+if not INCORRECT_104_VALUE_PATH.exists():
+    INCORRECT_104_VALUE_PATH.mkdir()
+
+if not PASSED_PATH.exists():
+    PASSED_PATH.mkdir()
         
 def process_file(c:case.Case) -> None:
-    src = os.path.join(FILES_PATH, c.name)
+    src = Path(FILES_PATH, c.name)
     dst = ""
     try:
-        if(not checks.is_centered(c.stl)):
-            dst = os.path.join(UNCENTERED_PATH, c.name)
+        if not checks.is_centered(c.stl):
+            dst = UNCENTERED_PATH.joinpath(c.name)
             return (src, dst)
         elif not checks.in_circle(c.stl, 7):
-            dst = os.path.join(OVER_14_PI_PATH, c.name)
+            dst = OVER_14_PI_PATH.joinpath(c.name)
             return (src, dst)
         elif not checks.in_circle(c.stl, 5):
-            dst = os.path.join(OVER_10_PI_PATH, c.name)
+            dst = OVER_10_PI_PATH.joinpath(c.name)
             return (src, dst)
-        elif(c.stl.length() > c.max_length):
-            dst = os.path.join(EXCEEDS_MAX_LENGTH_PATH, c.name)
+        elif c.stl.length() > c.max_length:
+            dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(c.name)
             return (src, dst)
-        elif(c.case_type == CaseType.ASC and c.ug_values == None):
-            dst = os.path.join(MISSING_UG_VALUES_PATH, c.name)
+        elif c.case_type == CaseType.ASC and c.ug_values is None:
+            dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
             return (src, dst)
-        elif(c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT):
+        elif c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT:
             if c.ug_values == "":
-                dst = os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
                 return (src, dst)
             elif c.ug_values == None:
-                dst = os.path.join(MISSING_UG_VALUES_PATH, c.name)
+                dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
                 return (src, dst)
-            elif(c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0):
-                dst = os.path.join(INCORRECT_104_VALUE_PATH, c.name)
+            elif c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0:
+                dst = INCORRECT_104_VALUE_PATH.joinpath(c.name)
                 return (src, dst)
-        dst = os.path.join(PASSED_PATH, c.name)
+        dst = PASSED_PATH.joinpath(c.name)
         return (src, dst)
     except FileNotFoundError:
         print("Could not find file", c.name)
@@ -98,7 +100,7 @@ def process_files(gui_app):
 class App:
     def __init__(self) -> None:
         self.master:tk.Tk = tk.Tk()
-        self.master.iconbitmap(os.path.join(ROOT_DIR, "resources", "icon.ico"))
+        self.master.iconbitmap(Path(ROOT_DIR, "resources", "icon.ico"))
         self.master.title("STL-Checker")
         self.master.option_add("*Font", "Arial 11")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -201,13 +203,13 @@ class App:
         prev_passed_count = 0
 
         while True:
-            uncentered_count = len([file for file in os.listdir(UNCENTERED_PATH) if ".stl" in file.lower()])
-            exceeds_10pi_count = len([file for file in os.listdir(OVER_10_PI_PATH) if ".stl" in file.lower()])
-            exceeds_14pi_count = len([file for file in os.listdir(OVER_14_PI_PATH) if ".stl" in file.lower()])
-            exceeds_length_count = len([file for file in os.listdir(EXCEEDS_MAX_LENGTH_PATH) if ".stl" in file.lower()])
-            missing_ug_values_count = len([file for file in os.listdir(MISSING_UG_VALUES_PATH) if ".stl" in file.lower()])
-            incorrect_104_value_count = len([file for file in os.listdir(INCORRECT_104_VALUE_PATH) if ".stl" in file.lower()])
-            passed_count = len([file for file in os.listdir(PASSED_PATH) if ".stl" in file.lower()])
+            uncentered_count = len([file for file in UNCENTERED_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            exceeds_10pi_count = len([file for file in OVER_10_PI_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            exceeds_14pi_count = len([file for file in OVER_14_PI_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            exceeds_length_count = len([file for file in EXCEEDS_MAX_LENGTH_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            missing_ug_values_count = len([file for file in MISSING_UG_VALUES_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            incorrect_104_value_count = len([file for file in INCORRECT_104_VALUE_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            passed_count = len([file for file in PASSED_PATH.iterdir() if file.suffix.lower() == ".stl"])
 
             if uncentered_count != prev_uncentered_count:
                 prev_uncentered_count = uncentered_count
@@ -238,13 +240,13 @@ class App:
                 self.passed_counter.set(passed_count)
 
     def open_files_folder(self) -> None:
-        if(os.name == "nt"):
+        if os.name == "nt":
             os.system(f'start {FILES_PATH}')
         else:
             os.system(f'open {FILES_PATH}')
 
     def open_output_folder(self) -> None:
-        if(os.name == "nt"):
+        if os.name == "nt":
             os.system(f'start {OUTPUT_FOLDER_PATH}')
         else:
             os.system(f'open {OUTPUT_FOLDER_PATH}')
