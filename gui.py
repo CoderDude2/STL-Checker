@@ -14,15 +14,16 @@ import checks
 
 ROOT_DIR = Path(__file__).resolve().parent
 
-OUTPUT_FOLDER_PATH = Path(ROOT_DIR, "output")
-FILES_PATH = Path(ROOT_DIR, "files")
-UNCENTERED_PATH = Path(ROOT_DIR, "output/uncentered")
-OVER_10_PI_PATH = Path(ROOT_DIR, "output/over_10_pi")
-OVER_14_PI_PATH = Path(ROOT_DIR, "output/over_14_pi")
-EXCEEDS_MAX_LENGTH_PATH = Path(ROOT_DIR, "output/exceeds_max_length")
-MISSING_UG_VALUES_PATH = Path(ROOT_DIR, "output/missing_ug_values")
-INCORRECT_104_VALUE_PATH= Path(ROOT_DIR, "output/incorrect_104_value")
-PASSED_PATH = Path(ROOT_DIR, "output/passed")
+OUTPUT_FOLDER_PATH = ROOT_DIR.joinpath("output")
+FILES_PATH = ROOT_DIR.joinpath("files")
+
+UNCENTERED_PATH = OUTPUT_FOLDER_PATH.joinpath("uncentered")
+OVER_10_PI_PATH = OUTPUT_FOLDER_PATH.joinpath("over_10_pi")
+OVER_14_PI_PATH = OUTPUT_FOLDER_PATH.joinpath("over_14_pi")
+EXCEEDS_MAX_LENGTH_PATH = OUTPUT_FOLDER_PATH.joinpath("exceeds_max_length")
+MISSING_UG_VALUES_PATH = OUTPUT_FOLDER_PATH.joinpath("missing_ug_values")
+INCORRECT_104_VALUE_PATH= OUTPUT_FOLDER_PATH.joinpath("incorrect_104_value")
+PASSED_PATH = OUTPUT_FOLDER_PATH.joinpath("passed")
 
 
 if not OUTPUT_FOLDER_PATH.exists():
