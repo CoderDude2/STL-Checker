@@ -6,7 +6,6 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from multiprocessing import Pool
-import subprocess
 
 import case
 from case import CaseType
