@@ -54,7 +54,7 @@ if not PASSED_PATH.exists():
     PASSED_PATH.mkdir()
         
 def process_file(c:case.Case) -> None:
-    src = Path(FILES_PATH, c.name)
+    src = FILES_PATH.joinpath(c.name)
     dst = ""
     try:
         if not checks.is_centered(c.stl):
