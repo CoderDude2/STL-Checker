@@ -7,8 +7,7 @@ import tkinter as tk
 from pathlib import Path
 from multiprocessing import Pool
 
-import case
-from case import CaseType
+from abutment import AbutmentType, Abutment, get_abutments
 import checks
 
 
@@ -53,40 +52,40 @@ if not INCORRECT_104_VALUE_PATH.exists():
 if not PASSED_PATH.exists():
     PASSED_PATH.mkdir()
         
-def process_file(c:case.Case) -> None:
-    src = FILES_PATH.joinpath(c.name)
-    dst = PASSED_PATH.joinpath(c.name)
+def process_file(abutment:Abutment) -> None:
+    src = FILES_PATH.joinpath(abutment.name)
+    dst = PASSED_PATH.joinpath(abutment.name)
     try:
-        if not checks.is_centered(c.stl):
-            dst = UNCENTERED_PATH.joinpath(c.name)
+        if not checks.is_centered(abutment.stl):
+            dst = UNCENTERED_PATH.joinpath(abutment.name)
             return (src, dst)
         
-        if not checks.in_circle(c.stl, 7):
-            dst = OVER_14_PI_PATH.joinpath(c.name)
+        if not checks.in_circle(abutment.stl, 7):
+            dst = OVER_14_PI_PATH.joinpath(abutment.name)
             return (src, dst)
         
-        if not checks.in_circle(c.stl, 5) and c.circle_diameter == 10:
-            dst = OVER_10_PI_PATH.joinpath(c.name)
+        if not checks.in_circle(abutment.stl, 5) and abutment.circle_diameter == 10:
+            dst = OVER_10_PI_PATH.joinpath(abutment.name)
             return (src, dst)
         
-        if c.stl.length() > c.max_length:
-            dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(c.name)
+        if abutment.stl.length() > abutment.max_length:
+            dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(abutment.name)
             return (src, dst)
         
-        if c.is_special and c.ug_values is None:
-            dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
+        if abutment.is_special and abutment.ug_values is None:
+            dst = MISSING_UG_VALUES_PATH.joinpath(abutment.name)
             return (src, dst)
 
-        if (c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT) and c.ug_values.UG_102 <= 5 and c.ug_values.UG_104 != 0:
-            dst = INCORRECT_104_VALUE_PATH.joinpath(c.name)
+        if (abutment.abutment_type == AbutmentType.TLOC or abutment.abutment_type == AbutmentType.AOT) and abutment.ug_values.UG_102 <= 5 and abutment.ug_values.UG_104 != 0:
+            dst = INCORRECT_104_VALUE_PATH.joinpath(abutment.name)
             return (src, dst)        
         return (src, dst)
     except FileNotFoundError:
-        print("Could not find file", c.name)
+        print("Could not find file", abutment.name)
 
 def process_files(gui_app):
     with Pool() as pool:
-        result = pool.imap_unordered(process_file, case.get_cases(FILES_PATH))
+        result = pool.imap_unordered(process_file, get_abutments(FILES_PATH))
 
         for src, dst in result:
             shutil.move(src, dst)
