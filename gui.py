@@ -55,34 +55,31 @@ if not PASSED_PATH.exists():
         
 def process_file(c:case.Case) -> None:
     src = FILES_PATH.joinpath(c.name)
-    dst = ""
+    dst = PASSED_PATH.joinpath(c.name)
     try:
         if not checks.is_centered(c.stl):
             dst = UNCENTERED_PATH.joinpath(c.name)
             return (src, dst)
-        elif not checks.in_circle(c.stl, 7):
+        
+        if not checks.in_circle(c.stl, 7):
             dst = OVER_14_PI_PATH.joinpath(c.name)
             return (src, dst)
-        elif not checks.in_circle(c.stl, 5):
+        
+        if not checks.in_circle(c.stl, 5) and c.circle_diameter == 10:
             dst = OVER_10_PI_PATH.joinpath(c.name)
             return (src, dst)
-        elif c.stl.length() > c.max_length:
+        
+        if c.stl.length() > c.max_length:
             dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(c.name)
             return (src, dst)
-        elif c.case_type == CaseType.ASC and c.ug_values is None:
+        
+        if c.is_special and c.ug_values is None:
             dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
             return (src, dst)
-        elif c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT:
-            if c.ug_values == "":
-                dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
-                return (src, dst)
-            elif c.ug_values == None:
-                dst = MISSING_UG_VALUES_PATH.joinpath(c.name)
-                return (src, dst)
-            elif c.ug_values["#102"] <= 5 and c.ug_values["#104"] != 0:
-                dst = INCORRECT_104_VALUE_PATH.joinpath(c.name)
-                return (src, dst)
-        dst = PASSED_PATH.joinpath(c.name)
+
+        if (c.case_type == CaseType.TLOC or c.case_type == CaseType.AOT) and c.ug_values.UG_102 <= 5 and c.ug_values.UG_104 != 0:
+            dst = INCORRECT_104_VALUE_PATH.joinpath(c.name)
+            return (src, dst)        
         return (src, dst)
     except FileNotFoundError:
         print("Could not find file", c.name)

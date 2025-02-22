@@ -30,6 +30,7 @@ class Case:
     case_type:CaseType = None
     max_length:float = 0
     ug_values:UG = None
+    is_special:bool = False
 
     def __str__(self) -> str:
         return f'{self.pdo} {self.connection}'
@@ -53,10 +54,13 @@ def get_cases(folder_path:Path) -> Generator[Case, None, None]:
                 
                 if("T-L" in file_regex_match.group("connection")):
                     abutment_case.case_type = CaseType.TLOC
+                    abutment_case.is_special = True
                 elif("AOT" in file_regex_match.group("connection")):
                     abutment_case.case_type = CaseType.AOT
+                    abutment_case.is_special = True
                 elif("ASC" in file_regex_match.group("connection")):
                     abutment_case.case_type = CaseType.ASC
+                    abutment_case.is_special = True
                 else:
                     abutment_case.case_type = CaseType.DS
 
