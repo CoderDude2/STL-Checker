@@ -69,15 +69,16 @@ def is_centered(stl_object:stl.STLObject) -> bool:
     z_intersection:bool = False
 
     for facet in stl_object.facets:
-        x_intersection = intersect_triangle(x_ray_origin, x_ray_direction, facet.v1, facet.v2, facet.v3) if x_intersection == False else x_intersection
-        y_intersection = intersect_triangle(y_ray_origin, y_ray_direction, facet.v1, facet.v2, facet.v3) if y_intersection == False else y_intersection
-        z_intersection = intersect_triangle(z_ray_origin, z_ray_direction, facet.v1, facet.v2, facet.v3) if z_intersection == False else z_intersection
-        if(z_intersection == True):
+        if not x_intersection:
+            x_intersection = intersect_triangle(x_ray_origin, x_ray_direction, facet.v1, facet.v2, facet.v3)
+        if not y_intersection:
+            y_intersection = intersect_triangle(y_ray_origin, y_ray_direction, facet.v1, facet.v2, facet.v3)
+        if not z_intersection:
+            z_intersection = intersect_triangle(z_ray_origin, z_ray_direction, facet.v1, facet.v2, facet.v3)
+        else:
             return False
-    if(x_intersection and y_intersection and not z_intersection):
-        return True
     
-    return False
+    return (x_intersection and y_intersection and not z_intersection)
 
 def in_circle(stl_file:stl.STLObject, radius:int) -> bool:
     for facet in stl_file.facets:
