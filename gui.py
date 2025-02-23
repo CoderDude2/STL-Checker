@@ -189,50 +189,39 @@ class App:
         self.process_files_btn.config(state=tk.NORMAL, text="Process Files")
         self.master.title("STL-Checker")
 
+    def get_stl_dir_file_count(self, dirpath: Path) -> int:
+        if dirpath.exists() and dirpath.is_dir():
+            return len([file for file in dirpath.iterdir() if file.suffix.lower() == ".stl"])
+
     def update_counters(self) -> None:
-        prev_uncentered_count = 0
-        prev_exceeds_10pi_count = 0
-        prev_exceeds_14pi_count = 0
-        prev_exceeds_length_count = 0
-        prev_missing_ug_values_count = 0
-        prev_incorrect_104_value_count = 0
-        prev_passed_count = 0
-
         while True:
-            uncentered_count = len([file for file in UNCENTERED_PATH.iterdir() if file.suffix.lower() == ".stl"])
-            exceeds_10pi_count = len([file for file in OVER_10_PI_PATH.iterdir() if file.suffix.lower() == ".stl"])
-            exceeds_14pi_count = len([file for file in OVER_14_PI_PATH.iterdir() if file.suffix.lower() == ".stl"])
-            exceeds_length_count = len([file for file in EXCEEDS_MAX_LENGTH_PATH.iterdir() if file.suffix.lower() == ".stl"])
-            missing_ug_values_count = len([file for file in MISSING_UG_VALUES_PATH.iterdir() if file.suffix.lower() == ".stl"])
-            incorrect_104_value_count = len([file for file in INCORRECT_104_VALUE_PATH.iterdir() if file.suffix.lower() == ".stl"])
-            passed_count = len([file for file in PASSED_PATH.iterdir() if file.suffix.lower() == ".stl"])
+            uncentered_count = self.get_stl_dir_file_count(UNCENTERED_PATH)
+            exceeds_10pi_count = self.get_stl_dir_file_count(OVER_10_PI_PATH)
+            exceeds_14pi_count = self.get_stl_dir_file_count(OVER_14_PI_PATH)
+            exceeds_length_count = self.get_stl_dir_file_count(EXCEEDS_MAX_LENGTH_PATH)
+            missing_ug_values_count = self.get_stl_dir_file_count(MISSING_UG_VALUES_PATH)
+            incorrect_104_value_count = self.get_stl_dir_file_count(INCORRECT_104_VALUE_PATH)
+            passed_count = self.get_stl_dir_file_count(PASSED_PATH)
 
-            if uncentered_count != prev_uncentered_count:
-                prev_uncentered_count = uncentered_count
+            if self.uncentered_counter.get() != uncentered_count:
                 self.uncentered_counter.set(uncentered_count)
             
-            if exceeds_10pi_count != prev_exceeds_10pi_count:
-                prev_exceeds_10pi_count = exceeds_10pi_count
+            if self.exceeds_10_pi_counter.get() != exceeds_10pi_count:
                 self.exceeds_10_pi_counter.set(exceeds_10pi_count)
             
-            if exceeds_14pi_count != prev_exceeds_14pi_count:
-                prev_exceeds_14pi_count = exceeds_14pi_count
+            if self.exceeds_14_pi_counter.get() != exceeds_14pi_count:
                 self.exceeds_14_pi_counter.set(exceeds_14pi_count)
             
-            if exceeds_length_count != prev_exceeds_length_count:
-                prev_exceeds_length_count = exceeds_length_count
+            if self.exceeds_max_length_counter.get() != exceeds_length_count:
                 self.exceeds_max_length_counter.set(exceeds_length_count)
             
-            if missing_ug_values_count != prev_missing_ug_values_count:
-                prev_missing_ug_values_count = missing_ug_values_count
+            if self.missing_ug_values_counter.get() != missing_ug_values_count:
                 self.missing_ug_values_counter.set(missing_ug_values_count)
 
-            if incorrect_104_value_count != prev_incorrect_104_value_count:
-                prev_incorrect_104_value_count = incorrect_104_value_count
+            if self.incorrect_104_value_counter.get() != incorrect_104_value_count:
                 self.incorrect_104_value_counter.set(incorrect_104_value_count)
 
-            if passed_count != prev_passed_count:
-                prev_passed_count = passed_count
+            if self.passed_counter.get() != passed_count:
                 self.passed_counter.set(passed_count)
 
     def open_files_folder(self) -> None:
