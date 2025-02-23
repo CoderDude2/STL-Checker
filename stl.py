@@ -30,13 +30,19 @@ class STLObject:
             z2: float = facet.v2[2]
             z3: float = facet.v3[2]
 
-            max_z = z1 if z1 > max_z else max_z
-            max_z = z2 if z3 > max_z else max_z
-            max_z = z3 if z3 > max_z else max_z
+            if z1 > max_z:
+                max_z = z1
+            if z2 > max_z:
+                max_z = z2
+            if z3 > max_z:
+                max_z = z3
 
-            min_z = z1 if z1 < min_z else min_z
-            min_z = z2 if z3 < min_z else min_z
-            min_z = z3 if z3 < min_z else min_z
+            if z1 < min_z:
+                min_z = z1
+            if z2 < min_z:
+                min_z = z2
+            if z3 < min_z:
+                min_z = z3
         return max_z - min_z
 
 
@@ -77,7 +83,6 @@ def open_stl_file(file_path: str) -> STLObject:
     with open(file_path, "rb") as stl_file:
         header: bytes = stl_file.read(80)
         facet_count: int = int.from_bytes(stl_file.read(4), "little")
-        print(facet_count)
-        facets: list[Facet] = [read_facet(stl_file) for i in range(0, facet_count)]
+        facets: list[Facet] = [read_facet(stl_file) for _ in range(facet_count)]
     stl: STLObject = STLObject(header=header, facet_count=facet_count, facets=facets)
     return stl
