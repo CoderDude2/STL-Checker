@@ -13,7 +13,7 @@ def normalize(vector: npt.NDArray) -> npt.NDArray:
 
 
 def distance_from_origin(point: npt.NDArray) -> float:
-    return np.sqrt(point[0] ** 2 + point[1] ** 2)
+    return np.sqrt(np.sum(np.pow(point ,2)))
 
 
 def intersect_triangle(
@@ -23,8 +23,8 @@ def intersect_triangle(
     v1: npt.NDArray,
     v2: npt.NDArray,
 ) -> bool:
-    v0v1: npt.NDArray = np.subtract(v1, v0)
-    v0v2: npt.NDArray = np.subtract(v2, v0)
+    v0v1: npt.NDArray = v1 - v0
+    v0v2: npt.NDArray = v2 - v0
     # Normal of the triangle
     N: npt.NDArray = normalize(np.cross(v0v1, v0v2))
 
