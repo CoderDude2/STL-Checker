@@ -11,9 +11,9 @@ import numpy.typing as npt
 @dataclass
 class Facet:
     normal: npt.ArrayLike
-    v1: npt.ArrayLike
-    v2: npt.ArrayLike
-    v3: npt.ArrayLike
+    v1: npt.NDArray
+    v2: npt.NDArray
+    v3: npt.NDArray
 
 
 @dataclass

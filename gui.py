@@ -21,7 +21,7 @@ OVER_10_PI_PATH = OUTPUT_FOLDER_PATH.joinpath("over_10_pi")
 OVER_14_PI_PATH = OUTPUT_FOLDER_PATH.joinpath("over_14_pi")
 EXCEEDS_MAX_LENGTH_PATH = OUTPUT_FOLDER_PATH.joinpath("exceeds_max_length")
 MISSING_UG_VALUES_PATH = OUTPUT_FOLDER_PATH.joinpath("missing_ug_values")
-INCORRECT_104_VALUE_PATH= OUTPUT_FOLDER_PATH.joinpath("incorrect_104_value")
+INCORRECT_104_VALUE_PATH = OUTPUT_FOLDER_PATH.joinpath("incorrect_104_value")
 PASSED_PATH = OUTPUT_FOLDER_PATH.joinpath("passed")
 
 
@@ -51,37 +51,47 @@ if not INCORRECT_104_VALUE_PATH.exists():
 
 if not PASSED_PATH.exists():
     PASSED_PATH.mkdir()
-        
-def process_file(abutment:Abutment) -> None:
-    src = FILES_PATH.joinpath(abutment.name)
-    dst = PASSED_PATH.joinpath(abutment.name)
-    try:
-        if not checks.is_centered(abutment.stl):
-            dst = UNCENTERED_PATH.joinpath(abutment.name)
-            return (src, dst)
-        
-        if not checks.in_circle(abutment.stl, 7):
-            dst = OVER_14_PI_PATH.joinpath(abutment.name)
-            return (src, dst)
-        
-        if not checks.in_circle(abutment.stl, 5) and abutment.circle_diameter == 10:
-            dst = OVER_10_PI_PATH.joinpath(abutment.name)
-            return (src, dst)
-        
-        if abutment.stl.length() > abutment.max_length:
-            dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(abutment.name)
-            return (src, dst)
-        
-        if abutment.is_special and abutment.ug_values is None:
-            dst = MISSING_UG_VALUES_PATH.joinpath(abutment.name)
-            return (src, dst)
 
-        if (abutment.abutment_type == AbutmentType.TLOC or abutment.abutment_type == AbutmentType.AOT) and abutment.ug_values.UG_102 <= 5 and abutment.ug_values.UG_104 != 0:
-            dst = INCORRECT_104_VALUE_PATH.joinpath(abutment.name)
-            return (src, dst)        
+
+def process_file(abutment: Abutment) -> tuple[Path, Path] | None:
+    src: Path = FILES_PATH.joinpath(abutment.name)
+    dst: Path = PASSED_PATH.joinpath(abutment.name)
+    try:
+        if abutment.stl:
+            if not checks.is_centered(abutment.stl):
+                dst = UNCENTERED_PATH.joinpath(abutment.name)
+                return (src, dst)
+
+            if not checks.in_circle(abutment.stl, 7):
+                dst = OVER_14_PI_PATH.joinpath(abutment.name)
+                return (src, dst)
+
+            if not checks.in_circle(abutment.stl, 5) and abutment.circle_diameter == 10:
+                dst = OVER_10_PI_PATH.joinpath(abutment.name)
+                return (src, dst)
+
+            if abutment.stl.length() > abutment.max_length:
+                dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(abutment.name)
+                return (src, dst)
+
+        if abutment.is_special:
+            if abutment.ug_values:
+                if (
+                    abutment.abutment_type == AbutmentType.TLOC
+                    or abutment.abutment_type == AbutmentType.AOT
+                    and abutment.ug_values.UG_102 <= 3
+                    and abutment.ug_values.UG_104 != 0
+                ):
+                    dst = INCORRECT_104_VALUE_PATH.joinpath(abutment.name)
+                    return (src, dst)
+            else:
+                dst = MISSING_UG_VALUES_PATH.joinpath(abutment.name)
+                return (src, dst)
         return (src, dst)
     except FileNotFoundError:
         print("Could not find file", abutment.name)
+    return None
+
 
 def process_files(gui_app):
     with Pool() as pool:
@@ -90,61 +100,100 @@ def process_files(gui_app):
         for src, dst in result:
             shutil.move(src, dst)
     gui_app.done_processing_callback()
-    
+
     return
+
 
 class App:
     def __init__(self) -> None:
-        self.master:tk.Tk = tk.Tk()
+        self.master: tk.Tk = tk.Tk()
         self.master.iconbitmap(Path(ROOT_DIR, "resources", "icon.ico"))
         self.master.title("STL-Checker")
         self.master.option_add("*Font", "Arial 11")
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
         self.master.config(background="#dddddd")
         self.master.geometry("250x404")
-        self.master.minsize(250,250)
+        self.master.minsize(250, 250)
 
-        self.update_counters_thread = threading.Thread(target=self.update_counters, daemon=True)
+        self.update_counters_thread = threading.Thread(
+            target=self.update_counters, daemon=True
+        )
         self.update_counters_thread.start()
 
-        self.uncentered_counter:tk.IntVar = tk.IntVar(value=0)
-        self.exceeds_10_pi_counter:tk.IntVar = tk.IntVar(value=0)
-        self.exceeds_14_pi_counter:tk.IntVar = tk.IntVar(value=0)
-        self.exceeds_max_length_counter:tk.IntVar = tk.IntVar(value=0)
-        self.missing_ug_values_counter:tk.IntVar = tk.IntVar(value=0)
-        self.incorrect_104_value_counter:tk.IntVar = tk.IntVar(value=0)
-        self.passed_counter:tk.IntVar = tk.IntVar(value=0)
+        self.uncentered_counter: tk.IntVar = tk.IntVar(value=0)
+        self.exceeds_10_pi_counter: tk.IntVar = tk.IntVar(value=0)
+        self.exceeds_14_pi_counter: tk.IntVar = tk.IntVar(value=0)
+        self.exceeds_max_length_counter: tk.IntVar = tk.IntVar(value=0)
+        self.missing_ug_values_counter: tk.IntVar = tk.IntVar(value=0)
+        self.incorrect_104_value_counter: tk.IntVar = tk.IntVar(value=0)
+        self.passed_counter: tk.IntVar = tk.IntVar(value=0)
 
-        self.add_files_btn:tk.Button = tk.Button(text="Add Files", command=self.open_files_folder)
-        self.process_files_btn:tk.Button = tk.Button(text="Process Files", command=self.start_processing_callback)
-        self.open_output_btn:tk.Button = tk.Button(text="Open Output Folder", width=20, command=self.open_output_folder)
+        self.add_files_btn: tk.Button = tk.Button(
+            text="Add Files", command=self.open_files_folder
+        )
+        self.process_files_btn: tk.Button = tk.Button(
+            text="Process Files", command=self.start_processing_callback
+        )
+        self.open_output_btn: tk.Button = tk.Button(
+            text="Open Output Folder", width=20, command=self.open_output_folder
+        )
 
-        self.label_frame:tk.Frame = tk.Frame(master=self.master)
+        self.label_frame: tk.Frame = tk.Frame(master=self.master)
         self.label_frame.option_add("*Label.Background", "#dddddd")
-        self.label_frame.grid_rowconfigure(list(range(7)), weight=1, uniform="Silent_Creme")
+        self.label_frame.grid_rowconfigure(
+            list(range(7)), weight=1, uniform="Silent_Creme"
+        )
         self.label_frame.grid_columnconfigure(0, weight=1)
-        self.spacer_frame:tk.Frame = tk.Frame(master=self.label_frame, width=20)
+        self.spacer_frame: tk.Frame = tk.Frame(master=self.label_frame, width=20)
 
-        self.uncentered_lbl:tk.Label = tk.Label(master=self.label_frame, text="Uncentered", anchor="w")
-        self.uncentered_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.uncentered_counter, width=5)
+        self.uncentered_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Uncentered", anchor="w"
+        )
+        self.uncentered_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.uncentered_counter, width=5
+        )
 
-        self.exceeds_10_pi_lbl:tk.Label = tk.Label(master=self.label_frame, text="Exceeds 10pi", anchor="w")
-        self.exceeds_10_pi_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_10_pi_counter)
+        self.exceeds_10_pi_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Exceeds 10pi", anchor="w"
+        )
+        self.exceeds_10_pi_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.exceeds_10_pi_counter
+        )
 
-        self.exceeds_14_pi_lbl:tk.Label = tk.Label(master=self.label_frame, text="Exceeds 14pi", anchor="w")
-        self.exceeds_14_pi_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_14_pi_counter)
+        self.exceeds_14_pi_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Exceeds 14pi", anchor="w"
+        )
+        self.exceeds_14_pi_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.exceeds_14_pi_counter
+        )
 
-        self.exceeds_max_length_lbl:tk.Label = tk.Label(master=self.label_frame, text="Exceeds Max Length", anchor="w")
-        self.exceeds_max_length_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.exceeds_max_length_counter)
+        self.exceeds_max_length_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Exceeds Max Length", anchor="w"
+        )
+        self.exceeds_max_length_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.exceeds_max_length_counter
+        )
 
-        self.missing_ug_values_lbl:tk.Label = tk.Label(master=self.label_frame, text="Missing UG Values", anchor="w")
-        self.missing_ug_values_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.missing_ug_values_counter)
+        self.missing_ug_values_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Missing UG Values", anchor="w"
+        )
+        self.missing_ug_values_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.missing_ug_values_counter
+        )
 
-        self.incorrect_104_value_lbl:tk.Label = tk.Label(master=self.label_frame, text="Incorrect 104 Value", anchor="w")
-        self.incorrect_104_value_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.incorrect_104_value_counter)
+        self.incorrect_104_value_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Incorrect 104 Value", anchor="w"
+        )
+        self.incorrect_104_value_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.incorrect_104_value_counter
+        )
 
-        self.passed_lbl:tk.Label = tk.Label(master=self.label_frame, text="Passed", anchor="w")
-        self.passed_count_lbl:tk.Label = tk.Label(master=self.label_frame, textvariable=self.passed_counter)
+        self.passed_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="Passed", anchor="w"
+        )
+        self.passed_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.passed_counter
+        )
 
         self.uncentered_lbl.grid(row=0, column=0, sticky="nsew")
         self.uncentered_count_lbl.grid(row=0, column=1, sticky="nsew")
@@ -180,7 +229,7 @@ class App:
         self.master.title("STL-Checker (Processing)")
         self.process_files_btn.config(state=tk.DISABLED, text="Processing...")
 
-        t = threading.Thread(target=process_files, args=(self, ))
+        t = threading.Thread(target=process_files, args=(self,))
         t.setDaemon(True)
         t.start()
 
@@ -191,7 +240,10 @@ class App:
 
     def get_stl_dir_file_count(self, dirpath: Path) -> int:
         if dirpath.exists() and dirpath.is_dir():
-            return len([file for file in dirpath.iterdir() if file.suffix.lower() == ".stl"])
+            return len(
+                [file for file in dirpath.iterdir() if file.suffix.lower() == ".stl"]
+            )
+        return 0
 
     def update_counters(self) -> None:
         while True:
@@ -199,22 +251,26 @@ class App:
             exceeds_10pi_count = self.get_stl_dir_file_count(OVER_10_PI_PATH)
             exceeds_14pi_count = self.get_stl_dir_file_count(OVER_14_PI_PATH)
             exceeds_length_count = self.get_stl_dir_file_count(EXCEEDS_MAX_LENGTH_PATH)
-            missing_ug_values_count = self.get_stl_dir_file_count(MISSING_UG_VALUES_PATH)
-            incorrect_104_value_count = self.get_stl_dir_file_count(INCORRECT_104_VALUE_PATH)
+            missing_ug_values_count = self.get_stl_dir_file_count(
+                MISSING_UG_VALUES_PATH
+            )
+            incorrect_104_value_count = self.get_stl_dir_file_count(
+                INCORRECT_104_VALUE_PATH
+            )
             passed_count = self.get_stl_dir_file_count(PASSED_PATH)
 
             if self.uncentered_counter.get() != uncentered_count:
                 self.uncentered_counter.set(uncentered_count)
-            
+
             if self.exceeds_10_pi_counter.get() != exceeds_10pi_count:
                 self.exceeds_10_pi_counter.set(exceeds_10pi_count)
-            
+
             if self.exceeds_14_pi_counter.get() != exceeds_14pi_count:
                 self.exceeds_14_pi_counter.set(exceeds_14pi_count)
-            
+
             if self.exceeds_max_length_counter.get() != exceeds_length_count:
                 self.exceeds_max_length_counter.set(exceeds_length_count)
-            
+
             if self.missing_ug_values_counter.get() != missing_ug_values_count:
                 self.missing_ug_values_counter.set(missing_ug_values_count)
 
@@ -226,16 +282,15 @@ class App:
 
     def open_files_folder(self) -> None:
         if os.name == "nt":
-            os.system(f'start {FILES_PATH}')
+            os.system(f"start {FILES_PATH}")
         else:
-            os.system(f'open {FILES_PATH}')
+            os.system(f"open {FILES_PATH}")
 
     def open_output_folder(self) -> None:
         if os.name == "nt":
-            os.system(f'start {OUTPUT_FOLDER_PATH}')
+            os.system(f"start {OUTPUT_FOLDER_PATH}")
         else:
-            os.system(f'open {OUTPUT_FOLDER_PATH}')
-        
+            os.system(f"open {OUTPUT_FOLDER_PATH}")
 
     def run(self) -> None:
         self.master.mainloop()
