@@ -1,7 +1,7 @@
 # Author: Isaac J. Boots
 
 from dataclasses import dataclass
-from collections import namedtuple
+from typing import NamedTuple
 from typing import Generator, Optional
 from enum import Enum
 from pathlib import Path
@@ -17,9 +17,13 @@ class AbutmentType(Enum):
     AOT = 4
 
 
-UG = namedtuple(
-    "UG", "UG_101 UG_102 UG_103 UG_104 UG_105", defaults=[None, None, None, None, None]
-)
+class UG(NamedTuple):
+    UG_101: float | None = None
+    UG_102: float | None = None
+    UG_103: float | None = None
+    UG_104: float | None = None
+    UG_105: float | None = None
+
 
 case_regex: re.Pattern = re.compile(
     r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection>[A-Za-z0-9;\-]+),(?P<id>\d+)\) ?\[?(?P<ug_values>[#0-9-=. ]+)?\]?[_0-9]*?(?P<file_type>\.\w+)"

@@ -62,11 +62,11 @@ def process_file(abutment: Abutment) -> tuple[Path, Path] | None:
                 dst = UNCENTERED_PATH.joinpath(abutment.name)
                 return (src, dst)
 
-            if not checks.in_circle(abutment.stl, 7):
+            if not checks.in_circle(stl_file=abutment.stl, radius=7):
                 dst = OVER_14_PI_PATH.joinpath(abutment.name)
                 return (src, dst)
 
-            if not checks.in_circle(abutment.stl, 5) and abutment.circle_diameter == 10:
+            if not checks.in_circle(stl_file=abutment.stl, radius=5) and abutment.circle_diameter == 10:
                 dst = OVER_10_PI_PATH.joinpath(abutment.name)
                 return (src, dst)
 
@@ -75,18 +75,20 @@ def process_file(abutment: Abutment) -> tuple[Path, Path] | None:
                 return (src, dst)
 
         if abutment.is_special:
-            if abutment.ug_values:
-                if (
-                    abutment.abutment_type == AbutmentType.TLOC
-                    or abutment.abutment_type == AbutmentType.AOT
-                    and abutment.ug_values.UG_102 <= 3
-                    and abutment.ug_values.UG_104 != 0
+            if not abutment.ug_values:
+                dst = MISSING_UG_VALUES_PATH.joinpath(abutment.name)
+                return (src, dst)
+
+            if (
+                abutment.abutment_type == AbutmentType.TLOC
+                or abutment.abutment_type == AbutmentType.AOT
+            ):
+                if abutment.ug_values.UG_102 <= 1 and (
+                    abutment.ug_values.UG_104 > 0.1 or abutment.ug_values.UG_104 < -0.1
                 ):
                     dst = INCORRECT_104_VALUE_PATH.joinpath(abutment.name)
                     return (src, dst)
-            else:
-                dst = MISSING_UG_VALUES_PATH.joinpath(abutment.name)
-                return (src, dst)
+
         return (src, dst)
     except FileNotFoundError:
         print("Could not find file", abutment.name)
