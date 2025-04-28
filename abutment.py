@@ -29,14 +29,22 @@ case_regex: re.Pattern = re.compile(
     r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection>[A-Za-z0-9;\-]+),(?P<id>\d+)\) ?\[?(?P<ug_values>[#0-9-=. ]+)?\]?[_0-9]*?(?P<file_type>\.\w+)"
 )
 fourteen_millimeter: list[str] = [
-    "NDG-CS",
-    "NDC-CS",
-    "MCN-CS",
-    "MCS-CS",
-    "MCW-CS",
-    "SXR-CS",
-    "SXW-CS",
-    "MRD-CS",
+    "NDG-CS-TA10",
+    "NDG-CS-TA14",
+    "NDC-CS-TA10",
+    "NDC-CS-TA14",
+    "MCN-CS-TA10",
+    "MCN-CS-TA14",
+    "MCS-CS-TA10",
+    "MCS-CS-TA14",
+    "MCW-CS-TA10",
+    "MCW-CS-TA14",
+    "SXR-CS-TA10",
+    "SXR-CS-TA14",
+    "SXW-CS-TA10",
+    "SXW-CS-TA14",
+    "MRD-CS-TA10",
+    "MRD-CS-TA14"
 ]
 
 
