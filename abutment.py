@@ -68,9 +68,7 @@ def get_abutments(folder_path: Path) -> Generator[Abutment, None, None]:
                 abutment.pdo = file_regex_match.group("PDO")
                 abutment.connection = file_regex_match.group("connection")
 
-                if "TA10" in file_regex_match.group(
-                    "connection"
-                ) or "TC10" in file_regex_match.group("connection"):
+                if "TA10" in file_regex_match.group("connection") or "TC10" in file_regex_match.group("connection") or "HA10" in file_regex_match.group("connection"):
                     abutment.circle_diameter = 10
                 else:
                     abutment.circle_diameter = 14

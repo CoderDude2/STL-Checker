@@ -1,6 +1,8 @@
 # Author: Isaac J. Boots
 
 import os
+from platform import system
+from subprocess import Popen
 import shutil
 import threading
 import tkinter as tk
@@ -283,16 +285,20 @@ class App:
                 self.passed_counter.set(passed_count)
 
     def open_files_folder(self) -> None:
-        if os.name == "nt":
-            os.system(f"start {FILES_PATH}")
+        if system() == "Windows":
+            os.startfile(FILES_PATH)
+        elif system() == "Darwin":
+            Popen(["open", FILES_PATH])
         else:
-            os.system(f"open {FILES_PATH}")
+            Popen(["xdg-open", FILES_PATH])
 
     def open_output_folder(self) -> None:
-        if os.name == "nt":
-            os.system(f"start {OUTPUT_FOLDER_PATH}")
+        if system() == "Windows":
+            os.startfile(OUTPUT_FOLDER_PATH)
+        elif system() == "Darwin":
+            Popen(["open", OUTPUT_FOLDER_PATH])
         else:
-            os.system(f"open {OUTPUT_FOLDER_PATH}")
+            Popen(["xdg-open", OUTPUT_FOLDER_PATH])
 
     def run(self) -> None:
         self.master.mainloop()
