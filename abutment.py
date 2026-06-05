@@ -26,7 +26,7 @@ class UG(NamedTuple):
 
 
 case_regex: re.Pattern = re.compile(
-    r"(?P<PDO>\w+-\w+-\d+)__\((?P<connection>[A-Za-z0-9;\-]+),(?P<id>\d+)\) ?\[?(?P<ug_values>[#0-9-=. ]+)?\]?[_0-9]*?(?P<file_type>\.\w+)"
+    r"(?P<PDO>\w+-\w+-\d+)_(?P<name>[a-zA-Z0-9 ]+)?_\((?P<connection>[A-Za-z0-9;\-]+),(?P<id>\d+)\) ?\[?(?P<ug_values>[#0-9-=. ]+)?\]?[_0-9]*?(?P<file_type>\.\w+)"
 )
 fourteen_millimeter: list[str] = [
     "NDG-CS",
