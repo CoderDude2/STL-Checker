@@ -7,13 +7,12 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
-
 @dataclass
 class Facet:
     normal: npt.ArrayLike
-    v1: npt.NDArray
-    v2: npt.NDArray
-    v3: npt.NDArray
+    v1: npt.NDArray[np.float64]
+    v2: npt.NDArray[np.float64]
+    v3: npt.NDArray[np.float64]
 
 
 @dataclass
@@ -21,6 +20,7 @@ class STLObject:
     header: bytes
     facet_count: int
     facets: list[Facet]
+    points: list[npt.NDArray[np.float64]]
 
     def length(self) -> float:
         min_z: float = self.facets[0].v1[2]
@@ -83,6 +83,20 @@ def open_stl_file(file_path: str) -> STLObject:
     with open(file_path, "rb") as stl_file:
         header: bytes = stl_file.read(80)
         facet_count: int = int.from_bytes(stl_file.read(4), "little")
-        facets: list[Facet] = [read_facet(stl_file) for _ in range(facet_count)]
-    stl: STLObject = STLObject(header=header, facet_count=facet_count, facets=facets)
+        facets: list[Facet] = []
+        points: list[npt.NDArray[np.float64]] = []
+        v_set: set[tuple[np.float64]] = set()
+        vertex_id = 0
+
+        for _ in range(facet_count):
+            f: Facet = read_facet(stl_file)
+            v_set.add(tuple(f.v1))
+            v_set.add(tuple(f.v2))
+            v_set.add(tuple(f.v3))
+            facets.append(f)
+        
+        for v in v_set:
+            points.append(np.array(v))
+        
+    stl: STLObject = STLObject(header=header, facet_count=facet_count, facets=facets, points=points)
     return stl
