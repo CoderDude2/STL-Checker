@@ -10,6 +10,16 @@ from pathlib import Path
 import stl
 
 
+@dataclass
+class Point3D:
+    x: np.float64
+    y: np.float64
+    z: np.float64
+
+    def __str__(self):
+        return f"({self.x}, {self.y}, {self.z})"
+
+
 def normalize(vector: npt.NDArray) -> npt.NDArray:
     if np.dot(vector, vector) > 0:
         return vector / np.sqrt(np.dot(vector, vector))
