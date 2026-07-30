@@ -19,16 +19,22 @@ class Point3D:
     def __str__(self):
         return f"({self.x}, {self.y}, {self.z})"
 
+@dataclass
+class Circle:
+    center_point: Point3D
+    radius: np.float64
+
+    def __str__(self):
+        return f"({self.center_point.x}, {self.center_point.y}) r={self.radius} z={self.center_point.z}"
+
 
 def normalize(vector: npt.NDArray) -> npt.NDArray:
     if np.dot(vector, vector) > 0:
         return vector / np.sqrt(np.dot(vector, vector))
     return vector
 
-
 def distance_from_origin(point: npt.NDArray) -> float:
     return np.sqrt(np.sum(np.pow(point ,2)))
-
 
 def intersect_triangle(
     ray_origin: npt.NDArray,
