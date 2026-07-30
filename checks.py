@@ -27,6 +27,11 @@ class Circle:
     def __str__(self):
         return f"({self.center_point.x}, {self.center_point.y}) r={self.radius} z={self.center_point.z}"
 
+def distance(p1:Point3D, p2:Point3D) -> np.float64:
+    return np.sqrt(np.pow(p1.x - p2.x, 2) + np.pow(p1.y - p2.y, 2))
+
+def midpoint(p1:Point3D, p2:Point3D) -> Point3D:
+    return Point3D((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, p1.z)
 
 def normalize(vector: npt.NDArray) -> npt.NDArray:
     if np.dot(vector, vector) > 0:
