@@ -24,6 +24,7 @@ OVER_14_PI_PATH = OUTPUT_FOLDER_PATH.joinpath("over_14_pi")
 EXCEEDS_MAX_LENGTH_PATH = OUTPUT_FOLDER_PATH.joinpath("exceeds_max_length")
 MISSING_UG_VALUES_PATH = OUTPUT_FOLDER_PATH.joinpath("missing_ug_values")
 INCORRECT_104_VALUE_PATH = OUTPUT_FOLDER_PATH.joinpath("incorrect_104_value")
+ASC_DS_MISMATCH_PATH = OUTPUT_FOLDER_PATH.joinpath("asc_ds_mismatch")
 PASSED_PATH = OUTPUT_FOLDER_PATH.joinpath("passed")
 
 
@@ -51,6 +52,9 @@ if not MISSING_UG_VALUES_PATH.exists():
 if not INCORRECT_104_VALUE_PATH.exists():
     INCORRECT_104_VALUE_PATH.mkdir()
 
+if not ASC_DS_MISMATCH_PATH.exists():
+    ASC_DS_MISMATCH_PATH.mkdir()
+
 if not PASSED_PATH.exists():
     PASSED_PATH.mkdir()
 
@@ -74,6 +78,10 @@ def process_file(abutment: Abutment) -> tuple[Path, Path] | None:
 
             if abutment.stl.length() > abutment.max_length:
                 dst = EXCEEDS_MAX_LENGTH_PATH.joinpath(abutment.name)
+                return (src, dst)
+
+            if checks.is_asc_ds_mistmatch(src) and "TA" in str(src):
+                dst = ASC_DS_MISMATCH_PATH
                 return (src, dst)
 
         if abutment.is_special:
@@ -130,6 +138,7 @@ class App:
         self.exceeds_max_length_counter: tk.IntVar = tk.IntVar(value=0)
         self.missing_ug_values_counter: tk.IntVar = tk.IntVar(value=0)
         self.incorrect_104_value_counter: tk.IntVar = tk.IntVar(value=0)
+        self.asc_ds_mismatch_counter: tk.IntVar = tk.IntVar(value=0)
         self.passed_counter: tk.IntVar = tk.IntVar(value=0)
 
         self.add_files_btn: tk.Button = tk.Button(
@@ -192,6 +201,13 @@ class App:
             master=self.label_frame, textvariable=self.incorrect_104_value_counter
         )
 
+        self.asc_ds_mismatch_lbl: tk.Label = tk.Label(
+            master=self.label_frame, text="ASC/DS Mismatch", anchor="w"
+        )
+        self.asc_ds_mismatch_count_lbl: tk.Label = tk.Label(
+            master=self.label_frame, textvariable=self.asc_ds_mismatch_counter
+        )
+
         self.passed_lbl: tk.Label = tk.Label(
             master=self.label_frame, text="Passed", anchor="w"
         )
@@ -217,8 +233,11 @@ class App:
         self.incorrect_104_value_lbl.grid(row=5, column=0, sticky="nsew")
         self.incorrect_104_value_count_lbl.grid(row=5, column=1, sticky="nsew")
 
-        self.passed_lbl.grid(row=6, column=0, sticky="nsew")
-        self.passed_count_lbl.grid(row=6, column=1, sticky="nsew")
+        self.asc_ds_mismatch_lbl.grid(row=6, column=0, sticky="nsew")
+        self.asc_ds_mismatch_count_lbl.grid(row=6, column=1, sticky="nsew")
+
+        self.passed_lbl.grid(row=7, column=0, sticky="nsew")
+        self.passed_count_lbl.grid(row=7, column=1, sticky="nsew")
 
         self.master.grid_rowconfigure(2, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
@@ -233,8 +252,7 @@ class App:
         self.master.title("STL-Checker (Processing)")
         self.process_files_btn.config(state=tk.DISABLED, text="Processing...")
 
-        t = threading.Thread(target=process_files, args=(self,))
-        t.setDaemon(True)
+        t = threading.Thread(target=process_files, args=(self,), daemon=True)
         t.start()
 
     def done_processing_callback(self):
@@ -261,6 +279,7 @@ class App:
             incorrect_104_value_count = self.get_stl_dir_file_count(
                 INCORRECT_104_VALUE_PATH
             )
+            asc_ds_mismatch_count = self.get_stl_dir_file_count(ASC_DS_MISMATCH_PATH)
             passed_count = self.get_stl_dir_file_count(PASSED_PATH)
 
             if self.uncentered_counter.get() != uncentered_count:
@@ -280,6 +299,9 @@ class App:
 
             if self.incorrect_104_value_counter.get() != incorrect_104_value_count:
                 self.incorrect_104_value_counter.set(incorrect_104_value_count)
+
+            if self.asc_ds_mismatch_counter.get() != asc_ds_mismatch_count:
+                self.asc_ds_mismatch_counter.set(asc_ds_mismatch_count)
 
             if self.passed_counter.get() != passed_count:
                 self.passed_counter.set(passed_count)

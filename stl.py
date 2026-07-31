@@ -3,17 +3,17 @@
 import io
 import struct
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import numpy.typing as npt
 
-
 @dataclass
 class Facet:
     normal: npt.ArrayLike
-    v1: npt.NDArray
-    v2: npt.NDArray
-    v3: npt.NDArray
+    v1: npt.NDArray[np.float64]
+    v2: npt.NDArray[np.float64]
+    v3: npt.NDArray[np.float64]
 
 
 @dataclass
@@ -21,6 +21,8 @@ class STLObject:
     header: bytes
     facet_count: int
     facets: list[Facet]
+    points: list[npt.NDArray[np.float64]]
+    name: str
 
     def length(self) -> float:
         min_z: float = self.facets[0].v1[2]
@@ -79,10 +81,32 @@ def read_facet(file_stream: io.BufferedReader) -> Facet:
     return f
 
 
-def open_stl_file(file_path: str) -> STLObject:
+def open_stl_file(file_path: str|Path) -> STLObject:
+    if type(file_path) is Path:
+        file_path = str(file_path)
+
     with open(file_path, "rb") as stl_file:
         header: bytes = stl_file.read(80)
         facet_count: int = int.from_bytes(stl_file.read(4), "little")
-        facets: list[Facet] = [read_facet(stl_file) for _ in range(facet_count)]
-    stl: STLObject = STLObject(header=header, facet_count=facet_count, facets=facets)
+        facets: list[Facet] = []
+        points = []
+        vertexMap = {}
+        vertex_id = 0
+
+        for _ in range(facet_count):
+            f: Facet = read_facet(stl_file)
+            if not vertexMap.get(tuple(f.v1)):
+                vertexMap[tuple(f.v1)] = vertex_id
+                vertex_id += 1
+            if not vertexMap.get(tuple(f.v2)):
+                vertexMap[tuple(f.v2)] = vertex_id
+                vertex_id += 1
+            if not vertexMap.get(tuple(f.v3)):
+                vertexMap[tuple(f.v3)] = vertex_id
+                vertex_id += 1
+            facets.append(f)
+        
+        points = [np.array(i) for i in vertexMap.keys()]
+        
+    stl: STLObject = STLObject(header=header, facet_count=facet_count, facets=facets, points=points, name=Path(file_path).name)
     return stl

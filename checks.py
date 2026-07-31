@@ -2,9 +2,36 @@
 
 import numpy as np
 import numpy.typing as npt
+import random
+import sys
+from dataclasses import dataclass
+from pathlib import Path
 
 import stl
 
+
+@dataclass
+class Point3D:
+    x: np.float64
+    y: np.float64
+    z: np.float64
+
+    def __str__(self):
+        return f"({self.x}, {self.y}, {self.z})"
+
+@dataclass
+class Circle:
+    center_point: Point3D
+    radius: np.float64
+
+    def __str__(self):
+        return f"({self.center_point.x}, {self.center_point.y}) r={self.radius} z={self.center_point.z}"
+
+def distance(p1:Point3D, p2:Point3D) -> np.float64:
+    return np.sqrt(np.pow(p1.x - p2.x, 2) + np.pow(p1.y - p2.y, 2))
+
+def midpoint(p1:Point3D, p2:Point3D) -> Point3D:
+    return Point3D((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, p1.z)
 
 def normalize(vector: npt.NDArray) -> npt.NDArray:
     if np.dot(vector, vector) > 0:
@@ -58,39 +85,64 @@ def intersect_triangle(
 
     return True
 
+def get_circle(p1: Point3D, p2: Point3D, p3: Point3D) -> Circle|None:
+    D: np.float64 = 2 * ((p1.x * (p2.y - p3.y)) + (p2.x * (p3.y - p1.y)) + (p3.x * (p1.y - p2.y)))
+
+    if D == 0.0:
+        return None
+
+    xc_numerator: np.float64 = (p1.x**2 + p1.y**2) * (p2.y - p3.y) + (p2.x**2 + p2.y**2) * (p3.y - p1.y) + (p3.x**2 + p3.y**2) * (p1.y - p2.y)
+    yc_numerator: np.float64 = (p1.x**2 + p1.y**2) * (p3.x - p2.x) + (p2.x**2 + p2.y**2) * (p1.x - p3.x) + (p3.x**2 + p3.y**2) * (p2.x - p1.x)
+
+    center_point_x: np.float64 = np.round(xc_numerator / D, 6)
+    center_point_y: np.float64 = np.round(yc_numerator / D, 6)
+
+    center_point: Point3D = Point3D(center_point_x, center_point_y, p1.z)
+    
+    r: np.float64 = distance(p1, center_point)
+
+    return Circle(center_point, r)
+
+
+
+def get_all_circles(stl_file: stl.STLObject) -> list[Circle]:
+    zMap = {}
+    
+    for point in stl_file.points:
+        rounded_z_val = np.round(point[2], 4)
+        if not zMap.get(rounded_z_val):
+            zMap[rounded_z_val] = [Point3D(np.round(point[0], 6), np.round(point[1], 6), np.round(point[2], 6))]
+        else:
+            zMap[rounded_z_val].append(Point3D(np.round(point[0], 6), np.round(point[1], 6), np.round(point[2], 6)))
+    
+    circles = {}
+
+    for key, val in zMap.items():
+        if len(val) > 20:
+            circles[key] = val
+    
+    result: list[Circle] = []
+    for val in circles.values():
+        cir = get_circle(val[0], val[1], val[2])
+
+        if cir is not None and round(cir.center_point.x, 2) == 0 and round(cir.center_point.y, 2) == 0:    
+            result.append(cir)
+    
+    return result
 
 def is_centered(stl_object: stl.STLObject) -> bool:
-    x_ray_origin: npt.NDArray = np.array([20, 0, 2])
-    x_ray_direction: npt.NDArray = normalize(x_ray_origin - np.array([0, 0, 0]))
+    return len(get_all_circles(stl_object)) > 3
 
-    y_ray_origin: npt.NDArray = np.array([0, 20, 2])
-    y_ray_direction: npt.NDArray = normalize(y_ray_origin - np.array([0, 0, 0]))
+def is_asc_ds_mistmatch(stl_path: str|Path) -> bool:
+    if type(stl_path) is str:
+        stl_path = Path(stl_path)
 
-    z_ray_origin: npt.NDArray = np.array([0, 0, 20])
-    z_ray_direction: npt.NDArray = normalize(z_ray_origin - np.array([0, 0, 0]))
+    stl_file:stl.STLObject = stl.open_stl_file(stl_path)
+    for point in stl_file.points:
+        if distance_from_origin(point[0:2]) < 0.73:
+            return True
 
-    x_intersection: bool = False
-    y_intersection: bool = False
-    z_intersection: bool = False
-
-    for facet in stl_object.facets:
-        if not x_intersection:
-            x_intersection = intersect_triangle(
-                x_ray_origin, x_ray_direction, facet.v1, facet.v2, facet.v3
-            )
-        if not y_intersection:
-            y_intersection = intersect_triangle(
-                y_ray_origin, y_ray_direction, facet.v1, facet.v2, facet.v3
-            )
-        if not z_intersection:
-            z_intersection = intersect_triangle(
-                z_ray_origin, z_ray_direction, facet.v1, facet.v2, facet.v3
-            )
-        else:
-            return False
-
-    return x_intersection and y_intersection and not z_intersection
-
+    return False
 
 def in_circle(stl_file: stl.STLObject, radius: int) -> bool:
     for facet in stl_file.facets:
