@@ -139,7 +139,7 @@ def is_asc_ds_mistmatch(stl_path: str|Path) -> bool:
 
     stl_file:stl.STLObject = stl.open_stl_file(stl_path)
     for point in stl_file.points:
-        if distance_from_origin(point[0:2]) < 0.67:
+        if (point[2]) > 5 and distance_from_origin(point[0:2]) < 1:
             return True
 
     return False
