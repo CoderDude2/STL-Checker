@@ -138,8 +138,16 @@ def is_asc_ds_mistmatch(stl_path: str|Path) -> bool:
         stl_path = Path(stl_path)
 
     stl_file:stl.STLObject = stl.open_stl_file(stl_path)
+    lowest_z_value_circle = None
+    for cir in get_all_circles(stl_file):
+        if lowest_z_value_circle is None:
+            lowest_z_value_circle = cir
+
+        if cir.center_point.z < lowest_z_value_circle.center_point.z:
+            lowest_z_value_circle = cir
+
     for point in stl_file.points:
-        if (point[2]) > 5 and distance_from_origin(point[0:2]) < 1:
+        if lowest_z_value_circle is not None and (point[2] - lowest_z_value_circle.center_point.z) > 5 and distance_from_origin(point[0:2]) < 1:
             return True
 
     return False

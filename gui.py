@@ -154,7 +154,7 @@ class App:
         self.label_frame: tk.Frame = tk.Frame(master=self.master)
         self.label_frame.option_add("*Label.Background", "#dddddd")
         self.label_frame.grid_rowconfigure(
-            list(range(7)), weight=1, uniform="Silent_Creme"
+            list(range(8)), weight=1, uniform="Silent_Creme"
         )
         self.label_frame.grid_columnconfigure(0, weight=1)
         self.spacer_frame: tk.Frame = tk.Frame(master=self.label_frame, width=20)
