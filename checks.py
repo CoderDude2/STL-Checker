@@ -19,6 +19,11 @@ class Point3D:
     def __str__(self):
         return f"({self.x}, {self.y}, {self.z})"
 
+    def __eq__(self, other) -> bool:
+        if self.x == other.x and self.y == other.y and self.z == other.z:
+            return True
+        return False
+
 @dataclass
 class Circle:
     center_point: Point3D
