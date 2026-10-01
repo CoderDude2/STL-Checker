@@ -2,7 +2,6 @@
 
 import io
 import struct
-import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -61,14 +60,13 @@ class STLObject:
                 length = np.linalg.norm(vec)
 
                 if np.isclose(length, target_length, atol=tolerance):
-                    geometric_center = self.points.mean(axis=0)
-                    print(np.round(geometric_center, 4))
+                    # geometric_center = self.points.mean(axis=0)
+                    print(p1, p2)
                     x_axis = vec / length
 
                     normal_norm = np.linalg.norm(facet.normal)
                     if normal_norm == 0.0:
                         continue
-                    print(f"{np.round(facet.normal, 4)}")
                     n_vec = facet.normal / normal_norm
 
                     y_axis = np.cross(n_vec, x_axis)
@@ -76,7 +74,6 @@ class STLObject:
                     if np.isclose(y_axis_len, 0.0, atol=1e-7):
                         continue
                     y_axis /= y_axis_len
-                    print(np.dot(n_vec, y_axis))
 
                     z_axis = np.cross(x_axis, y_axis)
                     midpoint = (p1 + p2) / 2.0
@@ -150,17 +147,12 @@ def open_stl_file(file_path: str|Path) -> STLObject:
     return stl
 
 
-def save_stl_file(file_path: str|Path, stl_object:STLObject, rotationMatrix: npt.NDArray|None = None):
+def save_stl_file(file_path: str|Path, stl_object:STLObject):
     with open(file_path, "wb+") as stl_file:
         stl_file.write(bytes(stl_object.header))
         stl_file.write(struct.pack("<I", stl_object.facet_count))
 
         for facet in stl_object.facets:
-            if not rotationMatrix is None:
-                facet.normal = rotationMatrix @ facet.normal
-                facet.v1 = rotationMatrix @ facet.v1
-                facet.v2 = rotationMatrix @ facet.v2
-                facet.v3 = rotationMatrix @ facet.v3
             facet_data = np.concatenate([facet.normal, facet.v1, facet.v2, facet.v3]).astype(np.float32)
             stl_file.write(facet_data.tobytes())
             stl_file.write(np.uint16(0).tobytes())
