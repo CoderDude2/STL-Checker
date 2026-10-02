@@ -130,13 +130,13 @@ def get_all_circles(stl_file: stl.STLObject) -> list[Circle]:
     for val in circles.values():
         cir = get_circle(val[0], val[1], val[2])
 
-        if cir is not None and round(cir.center_point.x, 2) == 0 and round(cir.center_point.y, 2) == 0:    
+        if cir is not None and round(cir.center_point.x, 2) == 0 and round(cir.center_point.y, 2) == 0:
             result.append(cir)
     
     return result
 
 def is_centered(stl_object: stl.STLObject) -> bool:
-    return len(get_all_circles(stl_object)) > 3
+    return len(get_all_circles(stl_object)) >= 3
 
 def is_asc_ds_mistmatch(stl_path: str|Path) -> bool:
     if type(stl_path) is str:

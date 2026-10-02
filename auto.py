@@ -210,12 +210,9 @@ def orient_and_center_stl(stl_file: stl.STLObject, edge_length):
     stl_file.points = stl_file.points @ R.T
 
     circles = get_circles(stl_file)
-    for cir in circles:
-        print(cir)
     print(f"# of circles: {len(circles)}")
     if len(circles) > 5:
-        lowest_z_cir = circles[0]
-        # print(f"Lowest Z Cir: {np.round(lowest_z_cir[0], 4)}")
+        lowest_z_cir = circles[3]
         shift = np.array([0,0,0]) - lowest_z_cir[0]
         for facet in stl_file.facets:
             facet.v1 += shift
